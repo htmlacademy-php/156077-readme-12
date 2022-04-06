@@ -245,7 +245,7 @@ $posts_data = [
                 <?php foreach ($posts_data as $postIndex => $post) : ?>
                     <article class="popular__post post <?= $post['type']; ?>">
                         <header class="post__header">
-                            <h2><?=  $post['header']; ?></h2>
+                            <h2><?= $post['header']; ?></h2>
                         </header>
                         <div class="post__main">
                             <?php if ($post['type'] == 'post-quote') : ?>
@@ -267,10 +267,10 @@ $posts_data = [
                                                 <img src="https://www.google.com/s2/favicons?domain=vitadental.ru" alt="Иконка">
                                             </div>
                                             <div class="post-link__info">
-                                                <h3><?=  $post['header']; ?></h3>
+                                                <h3><?= $post['header']; ?></h3>
                                             </div>
                                         </div>
-                                        <span><?=  $post['content']; ?></span>
+                                        <span><?= $post['content']; ?></span>
                                     </a>
                                 </div>
                             <?php elseif ($post['type'] == 'post-photo') : ?>
