@@ -1,7 +1,7 @@
 <?php
 require_once 'helpers.php';
+require_once 'functions.php';
 $is_auth = rand(0, 1);
-
 $user_name = 'Виктор'; // укажите здесь ваше имя
 $posts_data = [
     [
@@ -14,7 +14,7 @@ $posts_data = [
     [
         'header' => 'Игра престолов',
         'type' => 'post-text',
-        'content' => 'Не могу дождаться начала финального сезона своего любимого сериала!',
+        'content' => 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Если алфавит образ правилами рот родного заголовок речью собрал страну ты семантика повстречался раз большого предупреждал, обеспечивает на берегу текстов продолжил маленький своего своих за заглавных предупредила, великий грустный, страна? Которое всеми над заголовок назад страну ты переулка, заглавных пояс своего.',
         'user-name' => 'Владик',
         'avatar' => 'userpic.jpg',
     ],
@@ -254,7 +254,7 @@ $posts_data = [
                                     <cite><?= $post['user-name']; ?></cite>
                                 </blockquote>
                             <?php elseif ($post['type'] == 'post-text') : ?>
-                                 <p><?= $post['content']; ?></p>
+                                 <p><?= cropText($post['content']); ?></p>
                             <?php elseif ($post['type'] == 'post-photo') : ?>
                                 <div class="post-photo__image-wrapper">
                                     <img src="img/<?= $post['content']; ?>" alt="Фото от пользователя" width="360" height="240">
