@@ -1,9 +1,9 @@
 <?php
 require_once 'helpers.php';
 require_once 'functions.php';
-$is_auth = rand(0, 1);
-$user_name = 'Виктор'; // укажите здесь ваше имя
-$posts_data = [
+$isAuth = rand(0, 1);
+$userName = 'Виктор'; // укажите здесь ваше имя
+$postsData = [
     [
         'header' => 'Цитата',
         'type' => 'post-quote',
@@ -79,7 +79,7 @@ $posts_data = [
             </div>
         </form>
         <div class="header__nav-wrapper">
-            <?php if ($is_auth == 1) : ?>
+            <?php if ($isAuth == 1) : ?>
                 <nav class="header__nav">
                     <ul class="header__my-nav">
                         <li class="header__my-page header__my-page--popular">
@@ -107,7 +107,7 @@ $posts_data = [
                                 </div>
                                 <div class="header__profile-name">
                                     <span>
-                                        <?=$user_name; ?>
+                                        <?=$userName; ?>
                                     </span>
                                     <svg class="header__link-arrow" width="10" height="6">
                                         <use xlink:href="#icon-arrow-right-ad"></use>
@@ -241,8 +241,8 @@ $posts_data = [
             </div>
         </div>
         <div class="popular__posts">
-            <?php if ($posts_data && is_array($posts_data )) : ?>
-                <?php foreach ($posts_data as $postIndex => $post) : ?>
+            <?php if ($postsData && is_array($postsData )) : ?>
+                <?php foreach ($postsData as $postIndex => $post) : ?>
                     <article class="popular__post post <?= $post['type']; ?>">
                         <header class="post__header">
                             <h2><?= $post['header']; ?></h2>
@@ -254,7 +254,7 @@ $posts_data = [
                                     <cite><?= $post['user-name']; ?></cite>
                                 </blockquote>
                             <?php elseif ($post['type'] == 'post-text') : ?>
-                                 <p><?= cropText($post['content']); ?></p>
+                                 <p><?= cropText($post['content'], 200); ?></p>
                             <?php elseif ($post['type'] == 'post-photo') : ?>
                                 <div class="post-photo__image-wrapper">
                                     <img src="img/<?= $post['content']; ?>" alt="Фото от пользователя" width="360" height="240">
