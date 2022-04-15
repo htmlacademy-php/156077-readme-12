@@ -1,6 +1,6 @@
 <?php
 require_once 'helpers.php';
-require_once 'functions.php';
+
 $isAuth = rand(0, 1);
 $userName = 'Виктор'; // укажите здесь ваше имя
 $postsData = [
