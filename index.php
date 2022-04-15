@@ -1,9 +1,9 @@
 <?php
 require_once 'helpers.php';
-$is_auth = rand(0, 1);
 
-$user_name = 'Виктор'; // укажите здесь ваше имя
-$posts_data = [
+$isAuth = rand(0, 1);
+$userName = 'Виктор'; // укажите здесь ваше имя
+$postsData = [
     [
         'header' => 'Цитата',
         'type' => 'post-quote',
@@ -14,7 +14,7 @@ $posts_data = [
     [
         'header' => 'Игра престолов',
         'type' => 'post-text',
-        'content' => 'Не могу дождаться начала финального сезона своего любимого сериала!',
+        'content' => 'Далеко-далеко за словесными горами в стране гласных и согласных живут рыбные тексты. Если алфавит образ правилами рот родного заголовок речью собрал страну ты семантика повстречался раз большого предупреждал, обеспечивает на берегу текстов продолжил маленький своего своих за заглавных предупредила, великий грустный, страна? Которое всеми над заголовок назад страну ты переулка, заглавных пояс своего.',
         'user-name' => 'Владик',
         'avatar' => 'userpic.jpg',
     ],
@@ -79,7 +79,7 @@ $posts_data = [
             </div>
         </form>
         <div class="header__nav-wrapper">
-            <?php if ($is_auth == 1) : ?>
+            <?php if ($isAuth == 1) : ?>
                 <nav class="header__nav">
                     <ul class="header__my-nav">
                         <li class="header__my-page header__my-page--popular">
@@ -107,7 +107,7 @@ $posts_data = [
                                 </div>
                                 <div class="header__profile-name">
                                     <span>
-                                        <?=$user_name; ?>
+                                        <?=$userName; ?>
                                     </span>
                                     <svg class="header__link-arrow" width="10" height="6">
                                         <use xlink:href="#icon-arrow-right-ad"></use>
@@ -241,8 +241,8 @@ $posts_data = [
             </div>
         </div>
         <div class="popular__posts">
-            <?php if ($posts_data && is_array($posts_data )) : ?>
-                <?php foreach ($posts_data as $postIndex => $post) : ?>
+            <?php if ($postsData && is_array($postsData )) : ?>
+                <?php foreach ($postsData as $postIndex => $post) : ?>
                     <article class="popular__post post <?= $post['type']; ?>">
                         <header class="post__header">
                             <h2><?= $post['header']; ?></h2>
@@ -254,7 +254,7 @@ $posts_data = [
                                     <cite><?= $post['user-name']; ?></cite>
                                 </blockquote>
                             <?php elseif ($post['type'] == 'post-text') : ?>
-                                 <p><?= $post['content']; ?></p>
+                                 <p><?= cropText($post['content'], 200); ?></p>
                             <?php elseif ($post['type'] == 'post-photo') : ?>
                                 <div class="post-photo__image-wrapper">
                                     <img src="img/<?= $post['content']; ?>" alt="Фото от пользователя" width="360" height="240">
