@@ -19,11 +19,13 @@
         ';
 
         foreach ($words as $word) {
-            $symbolsCount += strlen($word);
-            array_push($cropWords, $word);
+            $symbolsCount += strlen($word);   
+
             if ($symbolsCount > $cropSybmols) {            
                 return implode(' ', $cropWords) . '...' . $redMoreElement; 
             } 
+            
+            array_push($cropWords, $word);
         }
 
         return $text;            
