@@ -1,6 +1,7 @@
 <?php
 require_once 'helpers.php';
 
+$title = 'readme: блог, каким он должен быть';
 $isAuth = rand(0, 1);
 $userName = 'Виктор'; // укажите здесь ваше имя
 $postsData = [
@@ -42,9 +43,9 @@ $postsData = [
 ];
 
 ?>
-123
+
 <?php
     $content = include_template( 'main.php', ['postsData' => $postsData] );
-    $layout = include_template( 'layout.php', ['content' => $content, 'title' => $userName, 'isAuth' => $isAuth] );
+    $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName, 'isAuth' => $isAuth] );
     print($layout); 
 ?>
