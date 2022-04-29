@@ -134,13 +134,13 @@ function include_template($name, array $data = [])
 {
     $name = 'templates/' . $name;
     $result = '';
-
     if (!is_readable($name)) {
         return $result;
     }
 
     ob_start();
     extract($data);
+ 
     require $name;
 
     $result = ob_get_clean();
@@ -286,7 +286,7 @@ function generate_random_date($index)
             $symbolsCount += strlen($word);   
 
             if ($symbolsCount > $cropSybmols) {            
-                return implode(' ', $cropWords) . '...' . $readMoreElement; 
+                return htmlspecialchars(implode(' ', $cropWords)) . '...' . $readMoreElement; 
             } 
             
             array_push($cropWords, $word);
