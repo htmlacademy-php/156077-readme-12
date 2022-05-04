@@ -1,6 +1,7 @@
 <?php
 require_once 'helpers.php';
 
+date_default_timezone_set('Europe/Moscow'); 
 $title = 'readme: блог, каким он должен быть';
 $isAuth = rand(0, 1);
 $userName = 'Виктор'; // укажите здесь ваше имя
