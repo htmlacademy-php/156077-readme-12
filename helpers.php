@@ -302,7 +302,7 @@ function generate_random_date($index)
      */
 
     function getRelativeDateDifference($date) {
-        var_dump($date);
+
         $currentDate = new DateTime();
         $dateDiff = $date->diff($currentDate);
         
