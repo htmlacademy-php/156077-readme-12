@@ -305,25 +305,25 @@ function generate_random_date($index)
 
         $currentDate = new DateTime();
         $dateDiff = $date->diff($currentDate);
-        
+
         $relativeDate = '';
         switch (true) {
-            case ((int)$dateDiff->format('%i') > 0 && (int)$dateDiff->format('%i') < 60) :
-                return $relativeDate = $dateDiff->format('%i') . ' ' . get_noun_plural_form($dateDiff->format('%i'), 'минута', 'минуты', 'минут') . ' назад';
-                
-            case ((int)$dateDiff->format('%h') >= 1 && (int)$dateDiff->format('%h') < 24) :
-                return $relativeDate = $dateDiff->format('%h') . ' ' . get_noun_plural_form($dateDiff->format('%h'), 'час', 'часа', 'часов') . ' назад';
+            case ($dateDiff->days / 7 >= 5 ) :
+                return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' назад'; 
+            
+            case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
+                return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' назад';
 
-            case ((int)$dateDiff->format('%d') >= 1 && (int)$dateDiff->format('%d') < 7) :
-                return $relativeDate = $dateDiff->format('%d') . ' ' . get_noun_plural_form($dateDiff->format('%d'), 'день', 'дня', 'дней') . ' назад';
-  
-            case ((int)$dateDiff->format('%a') / 7 >= 1 && (int)$dateDiff->format('%a') / 7 < 5) :
-                return $relativeDate = floor($dateDiff->format('%a') / 7) . ' ' . get_noun_plural_form(floor((int)$dateDiff->format('%a') / 7), 'неделя', 'недели', 'недель') . ' назад';
+            case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
+                return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' назад';
+            
+            case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
+                return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' назад';
 
-            case ((int)$dateDiff->format('%a') / 7 >= 5 ) :
-                return $relativeDate = $dateDiff->format('%m')  . ' ' . get_noun_plural_form($dateDiff->format('%m'), 'месяц', 'месяца', 'месяцев') . ' назад';    
-
+            case ($dateDiff->i > 0 && $dateDiff->i < 60) :
+                return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' назад';
+ 
             default:
-                return $relativeDate = $randomDate->format('d.m.Y H:i');
+                return $relativeDate = $date->format('d.m.Y H:i');
         }
     }
