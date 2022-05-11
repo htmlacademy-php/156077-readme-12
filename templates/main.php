@@ -143,32 +143,11 @@
                                         <b class="post__author-name"><?= htmlspecialchars($post['user-name']); ?></b>
 
                                         <?php
-                                            $randomDate = new DateTime(generate_random_date($postIndex));
-                                            $currentDate = new DateTime(date('Y-m-d H:i:s'));
-                                            $dateDiff = date_diff($currentDate, $randomDate);
-                                            $relativeDate = '';
-                                            switch (true) {
-                                                case ((int)$dateDiff->format('%i') > 0 && (int)$dateDiff->format('%i') < 60) :
-                                                    $relativeDate = $dateDiff->format('%i') . ' ' . get_noun_plural_form($dateDiff->format('%i'), 'минута', 'минуты', 'минут') . ' назад';
-                                                    break;
-                                                case ((int)$dateDiff->format('%h') >= 1 && (int)$dateDiff->format('%h') < 24) :
-                                                    $relativeDate = $dateDiff->format('%h') . ' ' . get_noun_plural_form($dateDiff->format('%h'), 'час', 'часа', 'часов') . ' назад';
-                                                    break;
-                                                case ((int)$dateDiff->format('%d') >= 1 && (int)$dateDiff->format('%d') < 7) :
-                                                    $relativeDate = $dateDiff->format('%d') . ' ' . get_noun_plural_form($dateDiff->format('%d'), 'день', 'дня', 'дней') . ' назад';
-                                                    break;    
-                                                case ((int)$dateDiff->format('%a') / 7 >= 1 && (int)$dateDiff->format('%a') / 7 < 5) :
-                                                    $relativeDate = floor($dateDiff->format('%a') / 7) . ' ' . get_noun_plural_form(floor((int)$dateDiff->format('%a') / 7), 'неделя', 'недели', 'недель') . ' назад';
-                                                    break;
-                                                case ((int)$dateDiff->format('%a') / 7 >= 5 ) :
-                                                    $relativeDate = $dateDiff->format('%m')  . ' ' . get_noun_plural_form($dateDiff->format('%m'), 'месяц', 'месяца', 'месяцев') . ' назад';    
-                                                    break;
-                                                default:
-                                                    $relativeDate = $randomDate->format('d.m.Y H:i');
-                                            }
+                                            $randomDate = new DateTime(generate_random_date($postIndex));    
+                                            
                                         ?>
                                         
-                                        <time class="post__time" title="<?= $randomDate->format('d.m.Y H:i'); ?>" datetime="<?= $randomDate->format('Y-m-d H:i:s'); ?>"><?= $relativeDate; ?></time>
+                                        <time class="post__time" title="<?= $randomDate->format('d.m.Y H:i'); ?>" datetime="<?= $randomDate->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($randomDate); ?></time>
                                     </div>
                                 </a>
                             </div>

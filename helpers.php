@@ -294,3 +294,36 @@ function generate_random_date($index)
 
         return $text;            
     }
+
+    /**
+     * Сравнивает дату $date c текущей
+     * @param [date object] [$date] [объект произовлаьной даты]
+     * @return {string} количество времени прошедшего с $date до текущей даты в относительном формате
+     */
+
+    function getRelativeDateDifference($date) {
+
+        $currentDate = new DateTime();
+        $dateDiff = $date->diff($currentDate);
+
+        $relativeDate = '';
+        switch (true) {
+            case ($dateDiff->days / 7 >= 5 ) :
+                return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' назад'; 
+            
+            case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
+                return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' назад';
+
+            case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
+                return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' назад';
+            
+            case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
+                return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' назад';
+
+            case ($dateDiff->i > 0 && $dateDiff->i < 60) :
+                return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' назад';
+ 
+            default:
+                return $relativeDate = $date->format('d.m.Y H:i');
+        }
+    }
