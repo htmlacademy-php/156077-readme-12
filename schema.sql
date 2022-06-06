@@ -33,7 +33,7 @@ CREATE TABLE posts (
   post_link TEXT,
   views_count INT,
   UNIQUE (user_id),
-  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (type) REFERENCES post_types (post_type) ON DELETE SET NULL
 );
 
@@ -57,7 +57,7 @@ CREATE TABLE comments (
   post_id INT NOT NULL,
   create_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   comment TEXT NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE SET NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE
 );
 
@@ -94,10 +94,3 @@ CREATE TABLE messages (
 
 CREATE INDEX message_sender_id ON messages(sender_id);
 CREATE INDEX message_recipient_id ON messages(recipient_id);
-
-CREATE TABLE user_status (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL UNIQUE,
-  is_authorized BOOLEAN NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
-);
