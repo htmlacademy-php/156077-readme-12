@@ -7,23 +7,22 @@ USE readme;
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   register_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  email VARCHAR(30) NOT NULL,
-  login VARCHAR(20) NOT NULL,
+  email VARCHAR(30) UNIQUE NOT NULL,
+  login VARCHAR(20) UNIQUE NOT NULL,
   password VARCHAR(50) NOT NULL,
-  avatar TEXT,
-  UNIQUE user_data (email, login, password)
+  avatar TEXT
 );
 
 CREATE TABLE post_types (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  post_type VARCHAR(20) UNIQUE NOT NULL,
-  icon_class VARCHAR(20) UNIQUE NOT NULL
+  name VARCHAR(20) UNIQUE NOT NULL,
+  icon VARCHAR(20) UNIQUE NOT NULL
 );
 
 CREATE TABLE posts (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  type VARCHAR(20),
+  user_id INT NOT NULL,
+  type_id INT,
   create_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   header VARCHAR(128) NOT NULL,
   post_text TEXT NOT NULL,
@@ -32,20 +31,18 @@ CREATE TABLE posts (
   post_video TEXT,
   post_link TEXT,
   views_count INT,
-  UNIQUE (user_id),
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
-  FOREIGN KEY (type) REFERENCES post_types (post_type) ON DELETE SET NULL
+  FOREIGN KEY (type_id) REFERENCES post_types (id) ON DELETE SET NULL
 );
 
 CREATE TABLE hashtags (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  hashtag VARCHAR(10) NOT NULL,
-  UNIQUE (hashtag)
+  hashtag VARCHAR(10) UNIQUE NOT NULL
 );
 
 CREATE TABLE hashtags_posts (
-  post_id INT NOT NULL ,
-  hashtag_id INT NOT NULL ,
+  post_id INT NOT NULL,
+  hashtag_id INT NOT NULL,
   UNIQUE post_hashtag (post_id, hashtag_id),
   FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE,
   FOREIGN KEY (hashtag_id) REFERENCES hashtags (id) ON DELETE CASCADE
