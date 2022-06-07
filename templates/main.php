@@ -143,8 +143,7 @@
                                         <b class="post__author-name"><?= htmlspecialchars($post['user-name']); ?></b>
 
                                         <?php
-                                            $randomDate = new DateTime(generate_random_date($postIndex));    
-                                            
+                                            $randomDate = new DateTime(generate_random_date($postIndex));                                     
                                         ?>
                                         
                                         <time class="post__time" title="<?= $randomDate->format('d.m.Y H:i'); ?>" datetime="<?= $randomDate->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($randomDate); ?></time>
