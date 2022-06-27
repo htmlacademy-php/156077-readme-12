@@ -2,10 +2,7 @@
     require_once 'helpers.php';
 
     date_default_timezone_set('Europe/Moscow');
-    $connectionDB = mysqli_connect("localhost", "user", "Winserus89","readme"); 
-    if ($connectionDB == false) {
-        exit("Ошибка подключения: " . mysqli_connect_error());
-    }
+    $connectionDB = dbConnect();
 
     $sqlGetPostTypes = "SELECT * FROM post_types";
     $postTypes = getDBData($connectionDB, $sqlGetPostTypes, 'all');

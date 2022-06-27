@@ -1,5 +1,18 @@
 <?php
 /**
+ * Подключает к базе данных
+ * @return string соединение с БД, либо false и выходит из скрипта
+ */
+function dbConnect() {
+    $connectionDB = mysqli_connect("localhost", "user", "Winserus89","readme"); 
+    if ($connectionDB  == false) {
+        exit("Ошибка подключения: " . mysqli_connect_error());
+    }
+
+    return $connectionDB;
+}
+
+/**
  * Проверяет переданную дату на соответствие формату 'ГГГГ-ММ-ДД'
  *
  * Примеры использования:
@@ -356,7 +369,7 @@ function generate_random_date($index)
      */
 
     function getDBDataCount ($dataCount, $dataCol, $table) {
-        $connectionDB = mysqli_connect("localhost", "user", "Winserus89","readme"); 
+        $connectionDB = dbConnect(); 
 
         $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
         $result = getDBData($connectionDB, $sql, 'single');
