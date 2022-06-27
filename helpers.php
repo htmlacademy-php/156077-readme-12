@@ -327,3 +327,39 @@ function generate_random_date($index)
                 return $relativeDate = $date->format('d.m.Y H:i');
         }
     }
+
+    /**
+     * Подсчитывает количество записей в переданной таблице по переданному столбцу
+     * @param [$connection] [запрос на подключение к БД]
+     * @param [$sql] [sql string] [sql запрос]
+     * @param [$resultsType] [string] [тип данных для возврата]
+     * @return {int} количество записей с [$dataCount]
+     */
+
+    function getDBData ($connection, $sql, $resultsType) {
+        $data = mysqli_query($connection, $sql);
+        if ($resultsType == 'all') {
+            $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
+        } elseif ($resultsType == 'single') {
+            $data = mysqli_fetch_assoc($data);
+        }
+
+        return $data;      
+    }
+
+    /**
+     * Подсчитывает количество записей в переданной таблице по переданному столбцу
+     * @param [$dataCount] [all] [значение столбца таблицы для подсчета]
+     * @param [$dataCol] [string] [столбец таблицы]
+     * @param [$table] [string] [название таблицы]
+     * @return {int} количество записей с [$dataCount]
+     */
+
+    function getDBDataCount ($dataCount, $dataCol, $table) {
+        $connectionDB = mysqli_connect("localhost", "user", "Winserus89","readme"); 
+
+        $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
+        $result = getDBData($connectionDB, $sql, 'single');
+    
+        return $result['count'];
+    }
