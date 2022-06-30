@@ -1,6 +1,7 @@
 <div class="container">
         <h1 class="page__title page__title--popular">Популярное</h1>
     </div>
+
     <div class="popular container">
         <div class="popular__filters-wrapper">
             <div class="popular__sorting sorting">
@@ -37,14 +38,14 @@
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
                     <li class="popular__filters-item popular__filters-item--all filters__item filters__item--all">
-                        <a class="filters__button filters__button--ellipse filters__button--all filters__button--active" href="#">
+                        <a class="filters__button filters__button--ellipse filters__button--all <?= ($filterPostTypeId == 'none') ? 'filters__button--active' : ''; ?>" href="/">
                             <span>Все</span>
                         </a>
                     </li>
                     <?php foreach ($postTypes as $postType) : ?>
                         <?php if ($postType['name'] == 'post-photo') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--photo button" href="#">
+                                <a class="filters__button filters__button--photo button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Фото</span>
                                     <svg class="filters__icon" width="22" height="18">
                                         <use xlink:href="#icon-filter-photo"></use>
@@ -55,7 +56,7 @@
 
                         <?php if ($postType['name'] == 'post-video') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--video button" href="#">
+                                <a class="filters__button filters__button--video button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Видео</span>
                                     <svg class="filters__icon" width="24" height="16">
                                         <use xlink:href="#icon-filter-video"></use>
@@ -66,7 +67,7 @@
 
                         <?php if ($postType['name'] == 'post-text') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--text button" href="#">
+                                <a class="filters__button filters__button--text button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Текст</span>
                                     <svg class="filters__icon" width="20" height="21">
                                         <use xlink:href="#icon-filter-text"></use>
@@ -77,7 +78,7 @@
 
                         <?php if ($postType['name'] == 'post-quote') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--quote button" href="#">
+                                <a class="filters__button filters__button--quote button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Цитата</span>
                                     <svg class="filters__icon" width="21" height="20">
                                         <use xlink:href="#icon-filter-quote"></use>
@@ -88,7 +89,7 @@
 
                         <?php if ($postType['name'] == 'post-link') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--link button" href="#">
+                                <a class="filters__button filters__button--link button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Ссылка</span>
                                     <svg class="filters__icon" width="21" height="18">
                                         <use xlink:href="#icon-filter-link"></use>
@@ -100,13 +101,13 @@
                 </ul>
             </div>
         </div>
+       
         <div class="popular__posts">
-            
             <?php if ($postsData && is_array($postsData )) : ?>
                 <?php foreach ($postsData as $postIndex => $post) : ?>
                     <article class="popular__post post <?= $post['type_name']; ?>">
                         <header class="post__header">
-                            <h2><?= htmlspecialchars($post['header']); ?></h2>
+                            <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
                         </header>
                         <div class="post__main">
                             <?php if ($post['type_name'] == 'post-quote') : ?>
@@ -161,10 +162,10 @@
                                         <b class="post__author-name"><?= htmlspecialchars($post['quote_author']); ?></b>
 
                                         <?php
-                                            $randomDate = new DateTime(generate_random_date($postIndex));                                     
+                                            $randomDate = new DateTime(generate_random_date($postIndex));                              
                                         ?>
                                         
-                                        <time class="post__time" title="<?= $randomDate->format('d.m.Y H:i'); ?>" datetime="<?= $randomDate->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($randomDate); ?></time>
+                                        <time class="post__time" title="<?= $randomDate->format('d.m.Y H:i'); ?>" datetime="<?= $randomDate->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($randomDate, 'назад'); ?></time>
                                     </div>
                                 </a>
                             </div>
@@ -177,7 +178,7 @@
                                         <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
                                             <use xlink:href="#icon-heart-active"></use>
                                         </svg>
-                                        <span><?= getDBDataCount($post['id'], 'post_id', 'likes');?></span>
+                                        <span><?= getDBDataCount($post['id'], 'post_id', 'likes'); ?></span>
                                         <span class="visually-hidden">количество лайков</span>
                                     </a>
                                     <a class="post__indicator post__indicator--comments button" href="#" title="Комментарии">
@@ -192,6 +193,8 @@
                         </footer>
                     </article>
                 <?php endforeach; ?>
+            <?php else : ?>
+                <p>Постов не найдено</p>
             <?php endif; ?>
         </div>
     </div>
