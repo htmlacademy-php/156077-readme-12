@@ -353,12 +353,14 @@ function generate_random_date($index)
     function getDBData ($connection, $sql, $resultsType) {
 
         $data = mysqli_query($connection, $sql);
-        if ($resultsType == 'all') {
-            $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
-        } elseif ($resultsType == 'single') {
-            $data = mysqli_fetch_assoc($data);
+        if ($data) {
+            if ($resultsType == 'all') {
+                $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
+            } elseif ($resultsType == 'single') {
+                $data = mysqli_fetch_assoc($data);
+            }
         }
-
+        
         return $data;      
     }
 
@@ -387,10 +389,18 @@ function generate_random_date($index)
 
     function getQueryParam($paramName) {
 
-        $paramValue = 'none';
+        $paramValue = NULL;
 
         if (!empty($_GET[$paramName])) {
-            $paramValue = $_GET[$paramName];
+
+            if ((int)$_GET[$paramName] != 0) {           
+                $paramValue = (int)$_GET[$paramName];                 
+            }
+
+            if ((int)$_GET[$paramName] == 0) {
+                $paramValue = htmlspecialchars($_GET[$paramName]);
+            }
+            
         }
 
         return $paramValue;
