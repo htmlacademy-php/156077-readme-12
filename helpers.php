@@ -311,10 +311,11 @@ function generate_random_date($index)
     /**
      * Сравнивает дату $date c текущей
      * @param [date object] [$date] [объект произовлаьной даты]
+     * @param [string] [$words] [добавочное слово после вывода временного периода]
      * @return {string} количество времени прошедшего с $date до текущей даты в относительном формате
      */
 
-    function getRelativeDateDifference($date) {
+    function getRelativeDateDifference ($date, $words) {
 
         $currentDate = new DateTime();
         $dateDiff = $date->diff($currentDate);
@@ -322,19 +323,19 @@ function generate_random_date($index)
         $relativeDate = '';
         switch (true) {
             case ($dateDiff->days / 7 >= 5 ) :
-                return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' назад'; 
+                return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
             
             case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
-                return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' назад';
+                return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
 
             case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
-                return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' назад';
+                return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' ' . $words;
             
             case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
-                return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' назад';
+                return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' ' . $words;
 
             case ($dateDiff->i > 0 && $dateDiff->i < 60) :
-                return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' назад';
+                return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' ' . $words;
  
             default:
                 return $relativeDate = $date->format('d.m.Y H:i');
@@ -342,21 +343,24 @@ function generate_random_date($index)
     }
 
     /**
-     * Подсчитывает количество записей в переданной таблице по переданному столбцу
+     * Получает данные из БД
      * @param [$connection] [запрос на подключение к БД]
      * @param [$sql] [sql string] [sql запрос]
      * @param [$resultsType] [string] [тип данных для возврата]
-     * @return {int} количество записей с [$dataCount]
+     * @return {array} массив полученных данных
      */
 
     function getDBData ($connection, $sql, $resultsType) {
-        $data = mysqli_query($connection, $sql);
-        if ($resultsType == 'all') {
-            $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
-        } elseif ($resultsType == 'single') {
-            $data = mysqli_fetch_assoc($data);
-        }
 
+        $data = mysqli_query($connection, $sql);
+        if ($data) {
+            if ($resultsType == 'all') {
+                $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
+            } elseif ($resultsType == 'single') {
+                $data = mysqli_fetch_assoc($data);
+            }
+        }
+        
         return $data;      
     }
 
@@ -375,4 +379,29 @@ function generate_random_date($index)
         $result = getDBData($connectionDB, $sql, 'single');
     
         return $result['count'];
+    }
+
+    /**
+     * Получает значение параметра GET запроса
+     * @param [$paramName] [string] [название параметра]
+     * @return {all} значение переданного параметра или 'none', если параметра нет
+     */
+
+    function getQueryParam($paramName) {
+
+        $paramValue = NULL;
+
+        if (!empty($_GET[$paramName])) {
+
+            if ((int)$_GET[$paramName] != 0) {           
+                $paramValue = (int)$_GET[$paramName];                 
+            }
+
+            if ((int)$_GET[$paramName] == 0) {
+                $paramValue = htmlspecialchars($_GET[$paramName]);
+            }
+            
+        }
+
+        return $paramValue;
     }
