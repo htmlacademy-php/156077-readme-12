@@ -1,9 +1,9 @@
-INSERT INTO post_types (name, icon) VALUES 
-('post-quote', 'quote'), 
-('post-text', 'text'), 
-('post-photo', 'photo'), 
-('post-link', 'link'),
-('post-video', 'video');
+INSERT INTO post_types (name, alter_name, icon) VALUES 
+('post-quote', 'Цитата', 'quote'), 
+('post-text', 'Текст', 'text'), 
+('post-photo', 'Фото', 'photo'), 
+('post-link', 'Ссылка', 'link'),
+('post-video', 'Видео', 'video');
 
 INSERT INTO users (email, login, password, avatar) VALUES 
 ('vasilich@readmy.ru', 'Лариса', 'safe_password', 'userpic-larisa-small.jpg'), 
