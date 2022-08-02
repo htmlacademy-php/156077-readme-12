@@ -4,8 +4,7 @@
     date_default_timezone_set('Europe/Moscow');
     $connectionDB = dbConnect();
 
-    $sqlGetPostTypes = "SELECT * FROM post_types";
-    $postTypes = getDBData($connectionDB, $sqlGetPostTypes, 'all');
+    $postTypes = getPostTypes();
 
     $condition = '';
     $filterPostTypeId = getQueryParam('post_type_id');

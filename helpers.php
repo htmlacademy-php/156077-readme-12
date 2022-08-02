@@ -76,7 +76,7 @@ function db_get_prepare_stmt($link, $sql, $data = [])
                 $stmt_data[] = $value;
             }
         }
-
+ 
         $values = array_merge([$stmt, $types], $stmt_data);
 
         $func = 'mysqli_stmt_bind_param';
@@ -145,7 +145,9 @@ function get_noun_plural_form(int $number, string $one, string $two, string $man
  */
 function include_template($name, array $data = [])
 {
+    
     $name = 'templates/' . $name;
+
     $result = '';
     if (!is_readable($name)) {
         return $result;
@@ -185,7 +187,7 @@ function check_youtube_url($url)
         return "Видео по такой ссылке не найдено. Проверьте ссылку на видео";
     }
 
-    return true;
+    return 'success';
 }
 
 /**
@@ -343,6 +345,24 @@ function generate_random_date($index)
     }
 
     /**
+     * Делает запись в БД
+     * @param [$connection] [запрос на подключение к БД]
+     * @param [$sql] [sql string] [sql запрос]
+     * @return {int} id добавленной записи
+     */
+
+    function insertDBData($sql) {
+        $connectionDB = dbConnect();
+        $data = mysqli_query($connection, $sql);
+        
+        if ($data) {
+            $last_id = mysqli_insert_id($con);
+        }
+        
+        return $last_id;      
+    }
+
+    /**
      * Получает данные из БД
      * @param [$connection] [запрос на подключение к БД]
      * @param [$sql] [sql string] [sql запрос]
@@ -387,6 +407,13 @@ function generate_random_date($index)
      * @return {all} значение переданного параметра или 'none', если параметра нет
      */
 
+     function getPostTypes() {
+        $sqlGetPostTypes = "SELECT * FROM post_types";
+        $postTypes = getDBData(dbConnect(), $sqlGetPostTypes, 'all');
+
+        return $postTypes;
+     }
+
     function getQueryParam($paramName) {
 
         $paramValue = NULL;
@@ -404,4 +431,78 @@ function generate_random_date($index)
         }
 
         return $paramValue;
+    }
+
+
+    function moveUploadedImg($file) {
+
+        $file_name = $file['name'];
+        $file_path = __DIR__ . '/uploads/';
+        $file_url = '/uploads/' . $file_name;
+
+        move_uploaded_file($file['tmp_name'], $file_path . $file_name);
+    }
+
+    function validateEmptyFilled($name) {
+        if ($_POST[$name] == '') {
+            return 'Это поле должно быть заполнено';
+        } else {
+            return 'success';
+        }
+    }
+
+    function validateLink($name) {
+        $validateLink = filter_var($_POST[$name], FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
+        if (!$validateLink) {
+            return 'Укажите корректную ссылку';
+        } else {
+            return 'success';
+        }
+    }
+
+    function downloadImageLink($name, $getImgName = false) {
+        $imgUrl = $_POST[$name];
+        $imgName = array_pop(explode('/', $imgUrl));
+
+        if ($getImgName) return $imgName;
+
+        $headers = @get_headers($imgUrl);
+        if(preg_match("|200|", $headers[0])) {
+            $image = file_get_contents($imgUrl);
+        }
+
+        if ($image) {
+            file_put_contents(__DIR__ . '/uploads/link-images/' . $imgName, $image);
+            return 'success';
+        } else {
+            return 'Изображение по ссылке не найдено';
+        }   
+    }
+
+    function validateUploadedFile($file) {
+        $fileType = $_FILES['userpic-file-photo']['type'];
+        $fileSize = $_FILES['userpic-file-photo']['size'];
+
+        $allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if ($fileSize > 0) {
+            if (in_array($fileType, $allowedFileTypes)) {       
+                return 'success';
+            } else {
+                return 'Недопустимый формат фото. Разрещены: gif, png, jpeg';
+            }
+            
+        } else {
+            return 'Размер файла 0 байт или изображение не загружено';
+        }
+    }
+
+    function validateTags($tags) {
+        $tags = explode(' ', $tags);
+        foreach ($tags as $tagIndex => $tag) {
+            if(!preg_match('/^[a-zа-яё]+$/iu', $tag)) {
+                return $tag . '- некорректный тег. Допустимы только русские или английские строчные символы. Разделяйте теги пробелом';
+            }         
+        }
+
+        return 'success';
     }
