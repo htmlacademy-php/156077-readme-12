@@ -119,11 +119,11 @@
                                  <p><?= cropText($post['post_text'], 200); ?></p>
                             <?php elseif ($post['type_name'] == 'post-photo') : ?>
                                 <div class="post-photo__image-wrapper">
-                                    <img src="img/<?= htmlspecialchars($post['post_text']); ?>" alt="Фото от пользователя" width="360" height="240">
+                                    <img src="<?= checkFilePath($post['post_image']); ?>" alt="Фото от пользователя" width="360" height="240">
                                 </div>
                             <?php elseif ($post['type_name'] == 'post-link') : ?>
                                 <div class="post-link__wrapper">
-                                    <a class="post-link__external" href="http://<?= $post['post_text']; ?>" title="Перейти по ссылке">
+                                    <a class="post-link__external" href="http://<?= $post['post_link']; ?>" title="Перейти по ссылке">
                                         <div class="post-link__info-wrapper">
                                             <div class="post-link__icon-wrapper">
                                                 <img src="https://www.google.com/s2/favicons?domain=vitadental.ru" alt="Иконка">
@@ -132,13 +132,13 @@
                                                 <h3><?= htmlspecialchars($post['header']); ?></h3>
                                             </div>
                                         </div>
-                                        <span><?= htmlspecialchars($post['post_text']); ?></span>
+                                        <span><?= htmlspecialchars($post['post_link']); ?></span>
                                     </a>
                                 </div>
                             <?php elseif ($post['type_name'] == 'post-video') : ?>
                                 <div class="post-video__block">
                                     <div class="post-video__preview">
-                                        <?=embed_youtube_cover($post['post_text']); ?>
+                                        <?=embed_youtube_cover($post['post_video']); ?>
                                         <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
                                     </div>
                                     <a href="post-details.html" class="post-video__play-big button">

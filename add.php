@@ -19,12 +19,13 @@
     ];
     $formFieldsError = [];
     
+    // валидация полей
     foreach ($_POST as $fieldName => $fieldValue) {
-
+        //валидация на заполненность
         if (in_array($fieldName, $requiredFields)) {
             $formFieldsError[$_POST['active-content-type']][$fieldName] = validateEmptyFilled($fieldName);
         }
-        
+        // валидация на корректность ссылки
         if ($fieldName == 'form-link' || $fieldName == 'video-link') {   
 
             $formFieldsError[$_POST['active-content-type']][$fieldName] = validateLink($fieldName);
@@ -33,7 +34,7 @@
                 $formFieldsError[$_POST['active-content-type']][$fieldName] = check_youtube_url($_POST[$fieldName]);      
             }
         }
-
+        // валидация фото-ссылки
         if ($fieldName == 'photo-link' && !empty($fieldValue)) {
             $formFieldsError[$_POST['active-content-type']][$fieldName] = validateLink($fieldName);
             
@@ -41,12 +42,12 @@
                 $formFieldsError[$_POST['active-content-type']][$fieldName] = downloadImageLink($fieldName);  
             }              
         }
-        
+        // валидация тегов
         if ($fieldName == 'form-tags' && !empty($fieldValue)) {
             $formFieldsError[$_POST['active-content-type']][$fieldName] = validateTags($fieldValue);
         }
     }
-    
+    // добавление загружаемого фото
     if (isset($_FILES['userpic-file-photo'])) {
         $validateFile = validateUploadedFile($_FILES['userpic-file-photo']);
 
@@ -57,7 +58,7 @@
             $formFieldsError[$_POST['active-content-type']]['userpic-file-photo'] = $validateFile;
         }
     }
-
+    // формируем список ошибок
     $validateErrors = [];
 
     foreach ($formFieldsError as $errorForm => $errorResultValues) {
@@ -65,7 +66,7 @@
             array_push($validateErrors, $errorResultValue);
         }
     }
-   
+    // если ошибок валидации нет, записываем данные в базу
     if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
         
         $postTypeName = (isset($_POST['active-content-type'])) ? filter_var($_POST['active-content-type'], FILTER_SANITIZE_STRING) : NULL;
@@ -82,11 +83,11 @@
             $postImg = 'link-images/' . downloadImageLink('photo-link', true);
         }
         $typeIdSql = "SELECT id FROM post_types WHERE name = '$postTypeName'";
-        $postTypeId = getDBData($connectionDB, $typeIdSql, 'single');
-        
+        $postTypeId = getDBData($connectionDB, $typeIdSql, 'single')['id'];
+        $userID = 9;
         $data = [
-            9,
-            $postTypeId['id'],
+            $userID,
+            $postTypeId,
             $postHeader,
             $postText,
             $postAuthor,
@@ -95,12 +96,36 @@
             $postLink
         ];
         
-        $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmp = db_get_prepare_stmt($connectionDB, $sql, $data);
+        $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $postInsertDBresult = insertDBDataFromArray($sqlPostPrepare, $data);
 
-        mysqli_stmt_execute($stmt);
- 
-        //insertDBData($sql);
+        // если пост добавлен в базу, добавляем хештеги при наличии
+        if ($postInsertDBresult) {
+            $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
+            $sqlTagsPrepare = "INSERT INTO hashtags (hashtag) VALUES (?)";
+            $tags = (isset($_POST['form-tags'])) ? explode(' ', filter_var($_POST['form-tags'], FILTER_SANITIZE_STRING)) : NULL;
+
+            if (!empty($_POST['form-tags'])) {
+                foreach ($tags as $tagIndex => $tag) {
+                    $data = [$tag];
+                    $tagInsertDBresult = insertDBDataFromArray($sqlTagsPrepare, $data);
+                    // добавляем новые теги или ищем в списке добавленных
+                    if ($tagInsertDBresult) {
+                        $data = [$postInsertDBresult, $tagInsertDBresult];
+                        insertDBDataFromArray($sqlTagsPostsPrepare, $data);
+                    } else {
+                        $sqlTagId = "SELECT id FROM hashtags WHERE hashtag = '$tag'";
+                        $DBtagId = getDBData($connectionDB, $sqlTagId, 'single')['id'];
+                        $data = [$postInsertDBresult, $DBtagId];
+                        insertDBDataFromArray($sqlTagsPostsPrepare, $data);
+                    }
+                }
+            }
+            // перенаправялем на страницу нового поста
+            header('HTTP/1.1 301 Moved Permanently');
+            header("Location: http://156077-readme-12/post.php?post_id=" . $postInsertDBresult);
+            exit();
+        }
     }
     
     $content = include_template( 'add_post.php', [
