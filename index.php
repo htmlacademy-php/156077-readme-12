@@ -10,11 +10,10 @@
     $filterPostTypeId = getQueryParam('post_type_id');
 
     if ($filterPostTypeId != NULL && gettype($filterPostTypeId) != 'string') {
-        $condition = 'WHERE posts.type_id =' . $filterPostTypeId;
+        $postsData = getPosts($filterPostTypeId);
+    } else {
+        $postsData = getPosts();
     }
-
-    $sqlGetPosts = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
-    $postsData = getDBData($connectionDB, $sqlGetPosts, 'all');
 
     $title = 'readme: блог, каким он должен быть';
     $isAuth = rand(0, 1);

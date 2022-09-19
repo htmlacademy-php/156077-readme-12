@@ -7,8 +7,7 @@
     $postId = getQueryParam('post_id');
 
     if ($postId != NULL) {
-        $sqlGetPostData = "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = $postId";
-        $postData = getDBData($connectionDB, $sqlGetPostData, 'single');
+        $postData = getPostData($postId);
     } 
 
     $title = 'readme: пост ' . $postData['header'];
@@ -20,7 +19,6 @@
 
 <?php
     if ($postData) {
-
         $content = include_template( 'detail-post.php', ['postData' => $postData, 'registerDate' => $authorRegisterDate] );     
         $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName, 'isAuth' => $isAuth] );
         print($layout); 

@@ -347,6 +347,34 @@ function insertDBDataFromArray($sql, $data) {
     
 }
 
+/**
+ * Записывает в базу данные нового поста
+ * @param [$data [простой массив переменных с данными поста]
+ * @return {int} id добавленной записи
+ */
+function insertNewPost($data) {
+    $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    return insertDBDataFromArray($sqlPostPrepare, $data);
+}
+
+/**
+ * Записывает в базу данные нового поста
+ * @param [$data [простой массив переменных с данными тегов]
+ * @param [$insertTable] [string] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
+ * @return {int} id добавленной записи
+ */
+function insertPostTags($data, $insertTable) {
+    $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
+    $sqlTagsPrepare = "INSERT INTO hashtags (hashtag) VALUES (?)";
+
+    if ($insertTable == 'hashtags') {
+        return insertDBDataFromArray($sqlTagsPrepare, $data);
+    } elseif ($insertTable == 'hashtags_post') {
+        return insertDBDataFromArray($sqlTagsPostsPrepare, $data);
+    }
+      
+}
+
 
 /**
  * Получает данные из БД
@@ -368,6 +396,59 @@ function getDBData ($connection, $sql, $resultsType) {
     }
     
     return $data;      
+}
+
+/**
+ * Получает id типа поста по его имени
+ * @param [$postTypeName] [string] [название типа поста]
+ * @return {int} id типа поста
+ */
+
+function getPostTypeIdByName($postTypeName) {
+    $connectionDB = dbConnect();
+
+    $sql = "SELECT id FROM post_types WHERE name = '$postTypeName'";
+    return getDBData($connectionDB, $sql, 'single')['id'];
+}
+
+/**
+ * Получает id хештэга по его имени
+ * @param [$tag] [string] [название хештега]
+ * @return {int} id хештега
+ */
+function getHashtagIdByName($tag) {
+    $connectionDB = dbConnect();
+
+    $sqlTagId = "SELECT id FROM hashtags WHERE hashtag = '$tag'";
+    return getDBData($connectionDB, $sqlTagId, 'single')['id'];
+}
+
+/**
+ * Получает данные поста по его id
+ * @param [$postId] [int] [id поста]
+ * @return {array} массив данных поста
+ */
+function getPostData($postId) {
+    $connectionDB = dbConnect();
+
+    $sqlGetPostData = "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = $postId";
+    return getDBData($connectionDB, $sqlGetPostData, 'single');
+}
+
+/**
+ * Получает данные всех постов
+ * @param [$postsTypeID] [int] [id типа поста для фильтрации]
+ * @return {array} массив данных постов
+ */
+function getPosts($postsTypeID = NULL) {
+    $connectionDB = dbConnect();
+    if ($postsTypeID != NULL) {
+        $condition = 'WHERE posts.type_id =' . $postsTypeID;
+    } else {
+        $condition = '';
+    }
+    $sqlGetPosts = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
+    return getDBData($connectionDB, $sqlGetPosts, 'all');
 }
 
 /**

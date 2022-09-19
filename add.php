@@ -82,8 +82,7 @@
         if (empty($_FILES['userpic-file-photo']['name']) && !empty($_POST['photo-link'])) {
             $postImg = 'link-images/' . downloadImageLink('photo-link', true);
         }
-        $typeIdSql = "SELECT id FROM post_types WHERE name = '$postTypeName'";
-        $postTypeId = getDBData($connectionDB, $typeIdSql, 'single')['id'];
+        $postTypeId = getPostTypeIdByName($postTypeName);
         $userID = 9;
         $data = [
             $userID,
@@ -95,29 +94,26 @@
             $postVideo,
             $postLink
         ];
-        
-        $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $postInsertDBresult = insertDBDataFromArray($sqlPostPrepare, $data);
+            
+        $postInsertDBresult = insertNewPost($data);
 
         // если пост добавлен в базу, добавляем хештеги при наличии
         if ($postInsertDBresult) {
-            $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
-            $sqlTagsPrepare = "INSERT INTO hashtags (hashtag) VALUES (?)";
+
             $tags = (isset($_POST['form-tags'])) ? explode(' ', filter_var($_POST['form-tags'], FILTER_SANITIZE_STRING)) : NULL;
 
             if (!empty($_POST['form-tags'])) {
                 foreach ($tags as $tagIndex => $tag) {
                     $data = [$tag];
-                    $tagInsertDBresult = insertDBDataFromArray($sqlTagsPrepare, $data);
+                    $tagInsertDBresult = insertPostTags($data, 'hashtags');
                     // добавляем новые теги или ищем в списке добавленных
                     if ($tagInsertDBresult) {
                         $data = [$postInsertDBresult, $tagInsertDBresult];
-                        insertDBDataFromArray($sqlTagsPostsPrepare, $data);
+                        insertPostTags($data, 'hashtags_post');
                     } else {
-                        $sqlTagId = "SELECT id FROM hashtags WHERE hashtag = '$tag'";
-                        $DBtagId = getDBData($connectionDB, $sqlTagId, 'single')['id'];
+                        $DBtagId = getHashtagIdByName($tag);
                         $data = [$postInsertDBresult, $DBtagId];
-                        insertDBDataFromArray($sqlTagsPostsPrepare, $data);
+                        insertPostTags($data, 'hashtags_post');
                     }
                 }
             }
