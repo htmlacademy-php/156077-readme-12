@@ -16,6 +16,7 @@ CREATE TABLE users (
 CREATE TABLE post_types (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(20) UNIQUE NOT NULL,
+  alter_name VARCHAR(20) UNIQUE NOT NULL,
   icon VARCHAR(20) UNIQUE NOT NULL
 );
 
@@ -25,12 +26,12 @@ CREATE TABLE posts (
   type_id INT,
   create_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   header VARCHAR(128) NOT NULL,
-  post_text TEXT NOT NULL,
-  quote_author TEXT,
-  post_image TEXT,
-  post_video TEXT,
-  post_link TEXT,
-  views_count INT,
+  post_text TEXT DEFAULT NULL,
+  quote_author TEXT DEFAULT NULL,
+  post_image TEXT DEFAULT NULL,
+  post_video TEXT DEFAULT NULL,
+  post_link TEXT DEFAULT NULL,
+  views_count INT DEFAULT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (type_id) REFERENCES post_types (id) ON DELETE SET NULL
 );

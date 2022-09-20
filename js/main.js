@@ -1,7 +1,5 @@
 'use strict';
 
-'use script';
-
 (function () {
   var ESC_KEYCODE = 27;
 
@@ -17,7 +15,38 @@
     }
   }
 })();
-'use script';
+
+(function () {
+ const addingPostContainer = document.querySelector(`.adding-post__tabs-list`); 
+ const addingPostForms = document.querySelectorAll(`.js-adding-post-form`);
+
+ if (addingPostContainer && addingPostForms) {
+  const addingPostTabs = addingPostContainer.querySelectorAll(`.js-adding-post-tab`);
+
+  addingPostContainer.addEventListener(`click`, (evt) => {
+    const target= evt.target;
+
+    if (target.closest(`.js-adding-post-tab`)) {
+      addingPostTabs.forEach ((tab) => {
+        tab.classList.remove(`filters__button--active`);
+        target.closest(`.js-adding-post-tab`).classList.add(`filters__button--active`);
+      });
+
+      addingPostForms.forEach((form) => {
+
+        if (target.closest(`.js-adding-post-tab`).dataset.type !== form.dataset.type) {
+          form.classList.remove(`tabs__content--active`);
+        } else if (target.closest(`.js-adding-post-tab`).dataset.type === form.dataset.type) {
+          form.classList.add(`tabs__content--active`);
+        }
+        
+      })
+    }
+  })
+
+ }
+
+})();
 
 (function () {
   var activeModal = document.querySelector('.modal--active');
@@ -75,11 +104,11 @@
     });
   }
 
-  // if (modal) {
-  //   showModal(addingPostSubmit, modalAdding);
-  // }
+  //if (modal) {
+    //showModal(addingPostSubmit, modalAdding);
+  //}
 })();
-(function () {
+/*(function () {
   var dropzone = document.querySelector('dropzone');
   var registrationFileZone = document.querySelector('.registration__file-zone');
   var addingPostPhotoFileZone = document.querySelector('.adding-post__file-zone--photo');
@@ -99,7 +128,7 @@
     }
   }
 
-  Dropzone.autoDiscover = false;
+ // Dropzone.autoDiscover = false;
 
   if (registrationFileZone) {
     var regDropzone = new Dropzone('.registration__file-zone', {
@@ -172,5 +201,5 @@
       previewTemplate: '<div class="dz-preview dz-file-preview"><div class="adding-post__video-wrapper form__file-wrapper form__file-wrapper--video"> <img class="form__image" src="" alt="" data-dz-thumbnail> </div> <div class="adding-post__file-data form__file-data"> <span class="adding-post__file-name form__file-name dz-filename" data-dz-name></span> <button class="adding-post__delete-button form__delete-button button" type="button" data-dz-remove> <span>Удалить</span> <svg class="adding-post__delete-icon form__delete-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18" width="12" height="12"><path d="M18 1.3L16.7 0 9 7.7 1.3 0 0 1.3 7.7 9 0 16.7 1.3 18 9 10.3l7.7 7.7 1.3-1.3L10.3 9z"/></svg> </button> </div></div>'
     });
   }
-})();
+})();*/
 //# sourceMappingURL=data:application/json;charset=utf8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiIiwic291cmNlcyI6WyJtYWluLmpzIl0sInNvdXJjZXNDb250ZW50IjpbIid1c2Ugc3RyaWN0JztcblxuLy89IHRlbXBsYXRlcy91dGlsLmpzXG4vLz0gdGVtcGxhdGVzL21vZGFsLmpzXG4vLz0gdGVtcGxhdGVzL2Ryb3B6b25lLXNldHRpbmdzLmpzXG4iXSwiZmlsZSI6Im1haW4uanMifQ==

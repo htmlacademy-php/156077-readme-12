@@ -35,60 +35,33 @@ function is_date_valid(string $date): bool
 }
 
 /**
- * Создает подготовленное выражение на основе готового SQL запроса и переданных данных
+ * Формироует строку типов переменных для передачи в подготовленный запрос
  *
- * @param $link mysqli Ресурс соединения
- * @param $sql string SQL запрос с плейсхолдерами вместо значений
- * @param array $data Данные для вставки на место плейсхолдеров
- *
- * @return mysqli_stmt Подготовленное выражение
+ * @param $data Массив переменных
+ * @return string строка типов переменных для подготовленного запроса
  */
-function db_get_prepare_stmt($link, $sql, $data = [])
-{
-    $stmt = mysqli_prepare($link, $sql);
-
-    if ($stmt === false) {
-        $errorMsg = 'Не удалось инициализировать подготовленное выражение: ' . mysqli_error($link);
-        die($errorMsg);
-    }
-
-    if ($data) {
+function getVarTypes($data) {
+    if (!$data) {
+        return false;
+    } else {
+        
         $types = '';
-        $stmt_data = [];
 
         foreach ($data as $value) {
-            $type = 's';
-
+            
             if (is_int($value)) {
                 $type = 'i';
-            } else {
-                if (is_string($value)) {
-                    $type = 's';
-                } else {
-                    if (is_double($value)) {
-                        $type = 'd';
-                    }
-                }
-            }
-
-            if ($type) {
-                $types .= $type;
-                $stmt_data[] = $value;
-            }
+            } elseif (is_string($value)) {
+                $type = 's';
+            } elseif (is_double($value)) {
+                $type = 'd';
+            }   
+            
+            $types .= $type;
         }
+    }  
 
-        $values = array_merge([$stmt, $types], $stmt_data);
-
-        $func = 'mysqli_stmt_bind_param';
-        $func(...$values);
-
-        if (mysqli_errno($link) > 0) {
-            $errorMsg = 'Не удалось связать подготовленное выражение с параметрами: ' . mysqli_error($link);
-            die($errorMsg);
-        }
-    }
-
-    return $stmt;
+    return $types;
 }
 
 /**
@@ -145,7 +118,9 @@ function get_noun_plural_form(int $number, string $one, string $two, string $man
  */
 function include_template($name, array $data = [])
 {
+    
     $name = 'templates/' . $name;
+
     $result = '';
     if (!is_readable($name)) {
         return $result;
@@ -185,7 +160,7 @@ function check_youtube_url($url)
         return "Видео по такой ссылке не найдено. Проверьте ссылку на видео";
     }
 
-    return true;
+    return 'success';
 }
 
 /**
@@ -283,125 +258,376 @@ function generate_random_date($index)
      * @return {string} обрезанная строка со ссылкой Читать далее
      */
     
-    function cropText($text, $cropSybmols = 300) {
-        $words = explode(' ', $text);
-        
-        $symbolsCount = 0;
-        $cropWords = [];
-
-        $readMoreElement = '
-            <div class="post-text__more-link-wrapper">
-                <a class="post-text__more-link" href="#">Читать далее</a>
-            </div>
-        ';
-
-        foreach ($words as $word) {
-            $symbolsCount += strlen($word);   
-
-            if ($symbolsCount > $cropSybmols) {            
-                return htmlspecialchars(implode(' ', $cropWords)) . '...' . $readMoreElement; 
-            } 
-            
-            array_push($cropWords, $word);
-        }
-
-        return $text;            
-    }
-
-    /**
-     * Сравнивает дату $date c текущей
-     * @param [date object] [$date] [объект произовлаьной даты]
-     * @param [string] [$words] [добавочное слово после вывода временного периода]
-     * @return {string} количество времени прошедшего с $date до текущей даты в относительном формате
-     */
-
-    function getRelativeDateDifference ($date, $words) {
-
-        $currentDate = new DateTime();
-        $dateDiff = $date->diff($currentDate);
-
-        $relativeDate = '';
-        switch (true) {
-            case ($dateDiff->days / 7 >= 5 ) :
-                return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
-            
-            case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
-                return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
-
-            case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
-                return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' ' . $words;
-            
-            case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
-                return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' ' . $words;
-
-            case ($dateDiff->i > 0 && $dateDiff->i < 60) :
-                return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' ' . $words;
- 
-            default:
-                return $relativeDate = $date->format('d.m.Y H:i');
-        }
-    }
-
-    /**
-     * Получает данные из БД
-     * @param [$connection] [запрос на подключение к БД]
-     * @param [$sql] [sql string] [sql запрос]
-     * @param [$resultsType] [string] [тип данных для возврата]
-     * @return {array} массив полученных данных
-     */
-
-    function getDBData ($connection, $sql, $resultsType) {
-
-        $data = mysqli_query($connection, $sql);
-        if ($data) {
-            if ($resultsType == 'all') {
-                $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
-            } elseif ($resultsType == 'single') {
-                $data = mysqli_fetch_assoc($data);
-            }
-        }
-        
-        return $data;      
-    }
-
-    /**
-     * Подсчитывает количество записей в переданной таблице по переданному столбцу
-     * @param [$dataCount] [all] [значение столбца таблицы для подсчета]
-     * @param [$dataCol] [string] [столбец таблицы]
-     * @param [$table] [string] [название таблицы]
-     * @return {int} количество записей с [$dataCount]
-     */
-
-    function getDBDataCount ($dataCount, $dataCol, $table) {
-        $connectionDB = dbConnect(); 
-
-        $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
-        $result = getDBData($connectionDB, $sql, 'single');
+function cropText($text, $cropSybmols = 300) {
+    $words = explode(' ', $text);
     
-        return $result['count'];
+    $symbolsCount = 0;
+    $cropWords = [];
+
+    $readMoreElement = '
+        <div class="post-text__more-link-wrapper">
+            <a class="post-text__more-link" href="#">Читать далее</a>
+        </div>
+    ';
+
+    foreach ($words as $word) {
+        $symbolsCount += strlen($word);   
+
+        if ($symbolsCount > $cropSybmols) {            
+            return htmlspecialchars(implode(' ', $cropWords)) . '...' . $readMoreElement; 
+        } 
+        
+        array_push($cropWords, $word);
     }
 
-    /**
-     * Получает значение параметра GET запроса
-     * @param [$paramName] [string] [название параметра]
-     * @return {all} значение переданного параметра или 'none', если параметра нет
-     */
+    return $text;            
+}
 
-    function getQueryParam($paramName) {
+/**
+ * Сравнивает дату $date c текущей
+ * @param [date object] [$date] [объект произовлаьной даты]
+ * @param [string] [$words] [добавочное слово после вывода временного периода]
+ * @return {string} количество времени прошедшего с $date до текущей даты в относительном формате
+ */
 
-        $paramValue = NULL;
+function getRelativeDateDifference ($date, $words) {
 
-        if (!empty($_GET[$paramName])) {
+    $currentDate = new DateTime();
+    $dateDiff = $date->diff($currentDate);
 
-            if ((int)$_GET[$paramName] != 0) {           
-                $paramValue = (int)$_GET[$paramName];                 
-            }
+    $relativeDate = '';
+    switch (true) {
+        case ($dateDiff->days / 7 >= 5 ) :
+            return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
+        
+        case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
+            return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
 
-            if ((int)$_GET[$paramName] == 0) {
-                $paramValue = htmlspecialchars($_GET[$paramName]);
-            }
-            
+        case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
+            return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' ' . $words;
+        
+        case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
+            return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' ' . $words;
+
+        case ($dateDiff->i > 0 && $dateDiff->i < 60) :
+            return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' ' . $words;
+
+        default:
+            return $relativeDate = $date->format('d.m.Y H:i');
+    }
+}
+
+/**
+ * Делает запись в БД из массива переменных
+ * @param [$data [простой массив переменных]
+ * @param [$sql] [sql string] [sql запрос]
+ * @return {int} id добавленной записи
+ */
+
+function insertDBDataFromArray($sql, $data) {
+
+    if (!$data || !is_array($data)) {
+        return false;
+    } else {
+        $varTypes = getVarTypes($data);
+        $mysqli = new mysqli("localhost", "user", "Winserus89","readme");
+        $stmt = $mysqli->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param($varTypes, ...$data);
+            $stmt->execute();
+            $lastId = $mysqli->insert_id;
+        } else {
+            return false;
+        }
+        
+        $mysqli->close();  
+        
+        return $lastId;
+    }
+    
+}
+
+/**
+ * Записывает в базу данные нового поста
+ * @param [$data [простой массив переменных с данными поста]
+ * @return {int} id добавленной записи
+ */
+function insertNewPost($data) {
+    $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    return insertDBDataFromArray($sqlPostPrepare, $data);
+}
+
+/**
+ * Записывает в базу данные нового поста
+ * @param [$data [простой массив переменных с данными тегов]
+ * @param [$insertTable] [string] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
+ * @return {int} id добавленной записи
+ */
+function insertPostTags($data, $insertTable) {
+    $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
+    $sqlTagsPrepare = "INSERT INTO hashtags (hashtag) VALUES (?)";
+
+    if ($insertTable == 'hashtags') {
+        return insertDBDataFromArray($sqlTagsPrepare, $data);
+    } elseif ($insertTable == 'hashtags_post') {
+        return insertDBDataFromArray($sqlTagsPostsPrepare, $data);
+    }
+      
+}
+
+
+/**
+ * Получает данные из БД
+ * @param [$connection] [запрос на подключение к БД]
+ * @param [$sql] [sql string] [sql запрос]
+ * @param [$resultsType] [string] [тип данных для возврата]
+ * @return {array} массив полученных данных
+ */
+
+function getDBData ($connection, $sql, $resultsType) {
+
+    $data = mysqli_query($connection, $sql);
+    if ($data) {
+        if ($resultsType == 'all') {
+            $data = mysqli_fetch_all($data, MYSQLI_ASSOC);
+        } elseif ($resultsType == 'single') {
+            $data = mysqli_fetch_assoc($data);
+        }
+    }
+    
+    return $data;      
+}
+
+/**
+ * Получает id типа поста по его имени
+ * @param [$postTypeName] [string] [название типа поста]
+ * @return {int} id типа поста
+ */
+
+function getPostTypeIdByName($postTypeName) {
+    $connectionDB = dbConnect();
+
+    $sql = "SELECT id FROM post_types WHERE name = '$postTypeName'";
+    return getDBData($connectionDB, $sql, 'single')['id'];
+}
+
+/**
+ * Получает id хештэга по его имени
+ * @param [$tag] [string] [название хештега]
+ * @return {int} id хештега
+ */
+function getHashtagIdByName($tag) {
+    $connectionDB = dbConnect();
+
+    $sqlTagId = "SELECT id FROM hashtags WHERE hashtag = '$tag'";
+    return getDBData($connectionDB, $sqlTagId, 'single')['id'];
+}
+
+/**
+ * Получает данные поста по его id
+ * @param [$postId] [int] [id поста]
+ * @return {array} массив данных поста
+ */
+function getPostData($postId) {
+    $connectionDB = dbConnect();
+
+    $sqlGetPostData = "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = $postId";
+    return getDBData($connectionDB, $sqlGetPostData, 'single');
+}
+
+/**
+ * Получает данные всех постов
+ * @param [$postsTypeID] [int] [id типа поста для фильтрации]
+ * @return {array} массив данных постов
+ */
+function getPosts($postsTypeID = NULL) {
+    $connectionDB = dbConnect();
+    if ($postsTypeID != NULL) {
+        $condition = 'WHERE posts.type_id =' . $postsTypeID;
+    } else {
+        $condition = '';
+    }
+    $sqlGetPosts = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
+    return getDBData($connectionDB, $sqlGetPosts, 'all');
+}
+
+/**
+ * Подсчитывает количество записей в переданной таблице по переданному столбцу
+ * @param [$dataCount] [all] [значение столбца таблицы для подсчета]
+ * @param [$dataCol] [string] [столбец таблицы]
+ * @param [$table] [string] [название таблицы]
+ * @return {int} количество записей с [$dataCount]
+ */
+
+function getDBDataCount ($dataCount, $dataCol, $table) {
+    $connectionDB = dbConnect(); 
+
+    $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
+    $result = getDBData($connectionDB, $sql, 'single');
+
+    return $result['count'];
+}
+
+/**
+ * Получает список типов постов
+ * @return {array} массив типов постов
+ */
+
+function getPostTypes() {
+    $sqlGetPostTypes = "SELECT * FROM post_types";
+    $postTypes = getDBData(dbConnect(), $sqlGetPostTypes, 'all');
+
+    return $postTypes;
+}
+
+/**
+ * Получает значение параметра GET запроса
+ * @param [$paramName] [string] [название параметра]
+ * @return {all} значение переданного параметра или 'none', если параметра нет
+ */
+
+function getQueryParam($paramName) {
+
+    $paramValue = NULL;
+
+    if (!empty($_GET[$paramName])) {
+
+        if ((int)$_GET[$paramName] != 0) {           
+            $paramValue = (int)$_GET[$paramName];                 
         }
 
-        return $paramValue;
+        if ((int)$_GET[$paramName] == 0) {
+            $paramValue = htmlspecialchars($_GET[$paramName]);
+        }
+        
     }
+
+    return $paramValue;
+}
+
+/**
+ * Перемещает загруженный файл в папку
+ * @param [$file] [file_object] [массив данных о файле из $_FILES]
+ * @return {none}
+ */
+function moveUploadedImg($file) {
+
+    $file_name = $file['name'];
+    $file_path = __DIR__ . '/uploads/';
+    $file_url = '/uploads/' . $file_name;
+
+    move_uploaded_file($file['tmp_name'], $file_path . $file_name);
+}
+
+/**
+ * Валидация на пустоту
+ * @param [$name] [string] [имя поля]
+ * @return {string} Результат проверки
+ */
+
+function validateEmptyFilled($name) {
+    if ($_POST[$name] == '') {
+        return 'Это поле должно быть заполнено';
+    } else {
+        return 'success';
+    }
+}
+
+/**
+ * Валидация на корректность ссылки
+ * @param [$name] [string] [имя поля]
+ * @return {string} Результат проверки
+ */
+function validateLink($name) {
+    $validateLink = filter_var($_POST[$name], FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
+    if (!$validateLink) {
+        return 'Укажите корректную ссылку';
+    } else {
+        return 'success';
+    }
+}
+
+/**
+ * Сохранение изображения по ссылке
+ * @param [$name] [string] [имя поля]
+ * @param [$name] [bool] [если true, функция просто возрвразает название файла]
+ * @return {string} скачивает фото, перемещает в папку и возвращает результат в текстовом формате
+ */
+function downloadImageLink($name, $getImgName = false) {
+    $imgUrl = $_POST[$name];
+    $imgName = array_pop(explode('/', $imgUrl));
+
+    if ($getImgName) return $imgName;
+
+    $headers = @get_headers($imgUrl);
+    if(preg_match("|200|", $headers[0])) {
+        $image = file_get_contents($imgUrl);
+    }
+
+    if ($image) {
+        file_put_contents(__DIR__ . '/uploads/link-images/' . $imgName, $image);
+        return 'success';
+    } else {
+        return 'Изображение по ссылке не найдено';
+    }   
+}
+
+/**
+ * Валидация загруженного файла
+ * @param [$file] [file_data] [массив данных файла из $_FILES]
+ * @return {string} Результат проверки
+ */
+function validateUploadedFile($file) {
+    $fileType = $_FILES['userpic-file-photo']['type'];
+    $fileSize = $_FILES['userpic-file-photo']['size'];
+
+    $allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if ($fileSize > 0) {
+        if (in_array($fileType, $allowedFileTypes)) {       
+            return 'success';
+        } else {
+            return 'Недопустимый формат фото. Разрещены: gif, png, jpeg';
+        }
+        
+    } else {
+        return 'Размер файла 0 байт или изображение не загружено';
+    }
+}
+
+/**
+ * Валидация тегов
+ * @param [$tags] [string] [строка тегов]
+ * @return {string} Результат проверки
+ */
+function validateTags($tags) {
+    $tags = explode(' ', $tags);
+    foreach ($tags as $tagIndex => $tag) {
+        if(!preg_match('/^[a-zа-яё]+$/iu', $tag)) {
+            return $tag . '- некорректный тег. Допустимы только русские или английские строчные символы. Разделяйте теги пробелом';
+        }         
+    }
+
+    return 'success';
+}
+
+/**
+ * Проверяет существование фото в папках
+ * @param [$fileName] [string] [название файла]
+ * @return {string} Путь к файлу
+ */
+function checkFilePath($fileName) {
+
+    if (file_exists('img/' . $fileName)) {    
+        $imgPath = '/img/' . $fileName;
+    }
+
+    if (file_exists('uploads/' . $fileName)) {
+        $imgPath = '/uploads/' . $fileName;
+    }
+
+    if (file_exists('uploads/link-images/' . $fileName)) {
+        $imgPath = '/uploads/link-images/' . $fileName;
+    }
+
+    return htmlspecialchars($imgPath);
+}

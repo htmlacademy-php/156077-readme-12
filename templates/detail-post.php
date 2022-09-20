@@ -33,13 +33,13 @@
                 <!-- пост-ссылка -->
                 <div class="post__main">
                     <div class="post-link__wrapper">
-                        <a class="post-link__external" href="http://<?= $postData['post_text']; ?>" title="Перейти по ссылке">
+                        <a class="post-link__external" href="http://<?= $postData['post_link']; ?>" title="Перейти по ссылке">
                             <div class="post-link__info-wrapper">
                                 <div class="post-link__icon-wrapper">
-                                <img src="https://www.google.com/s2/favicons?domain=<?= $postData['post_text']; ?>" alt="Иконка">
+                                <img src="https://www.google.com/s2/favicons?domain=<?= $postData['post_link']; ?>" alt="Иконка">
                                 </div>
                                 <div class="post-link__info">
-                                <h3><?= $postData['post_text']; ?></h3>
+                                <h3><?= $postData['post_link']; ?></h3>
                                 </div>
                             </div>
                         </a>
@@ -50,13 +50,13 @@
 
                 <!-- пост-изображение -->
                 <div class="post-details__image-wrapper post-photo__image-wrapper">
-                    <img src="/img/<?= $postData['post_text']; ?>" alt="Фото от пользователя" width="760" height="507">
+                    <img src="<?= checkFilePath($postData['post_image']); ?>" alt="Фото от пользователя" width="760" height="507">
                 </div>
             
             <?php elseif ($postData['type_name'] == 'post-video') : ?>
                 <!-- пост-видео -->
                 <div class="post-details__image-wrapper post-photo__image-wrapper">
-                    <?=embed_youtube_video($postData['post_text']); ?>
+                    <?=embed_youtube_video($postData['post_video']); ?>
                 </div>
             
             <?php endif; ?>
@@ -88,7 +88,7 @@
                 <span class="visually-hidden">количество репостов</span>
               </a>
             </div>
-            <span class="post__view"><?= $postData['views_count'];?> <?= get_noun_plural_form($postData['views_count'], 'просмотр', 'просмотра', 'просмотров'); ?></span>
+            <span class="post__view"><?= $postData['views_count'];?> <?= ($postData['views_count']) ? get_noun_plural_form($postData['views_count'], 'просмотр', 'просмотра', 'просмотров') : ''; ?></span>
           </div>
           <ul class="post__tags">
             <li><a href="#">#nature</a></li>
