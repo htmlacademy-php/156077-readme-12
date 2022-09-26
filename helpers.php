@@ -357,6 +357,11 @@ function insertNewPost($data) {
     return insertDBDataFromArray($sqlPostPrepare, $data);
 }
 
+function insertNewUser($data) {
+    $sqlUserPrepare = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
+    return insertDBDataFromArray($sqlUserPrepare, $data);
+}
+
 /**
  * Записывает в базу данные нового поста
  * @param [$data [простой массив переменных с данными тегов]
@@ -385,7 +390,6 @@ function insertPostTags($data, $insertTable) {
  */
 
 function getDBData ($connection, $sql, $resultsType) {
-
     $data = mysqli_query($connection, $sql);
     if ($data) {
         if ($resultsType == 'all') {
@@ -396,6 +400,37 @@ function getDBData ($connection, $sql, $resultsType) {
     }
     
     return $data;      
+}
+
+function checkUserByEmail($mail) {
+    $connectionDB = dbConnect();
+
+    $sql = "SELECT id FROM users WHERE email = '$mail'";
+
+    $userMailExist = getDBData($connectionDB, $sql, 'single')['id'];
+    if(!$userMailExist) {
+        return 'success'; 
+    } else {
+        return 'Пользователь с таким email уже зарегистрирован';
+    }
+
+}
+
+function checkUserLogin($login) {
+    $connectionDB = dbConnect();
+    
+    if (strlen($login) > 20) {
+        return 'Логин не может превышать 20 символов';
+    }
+
+    $sql = "SELECT id FROM users WHERE login = '$login'";
+
+    $userLoginExist = getDBData($connectionDB, $sql, 'single')['id'];
+    if(!$userLoginExist) {
+        return 'success'; 
+    } else {
+        return 'занят';
+    }
 }
 
 /**
@@ -510,11 +545,11 @@ function getQueryParam($paramName) {
  * @param [$file] [file_object] [массив данных о файле из $_FILES]
  * @return {none}
  */
-function moveUploadedImg($file) {
+function moveUploadedImg($file, $subDirectory = '') {
 
     $file_name = $file['name'];
-    $file_path = __DIR__ . '/uploads/';
-    $file_url = '/uploads/' . $file_name;
+    $file_path = __DIR__ . '/uploads/' . $subDirectory;
+    $file_url = '/uploads/' . $subDirectory . $file_name;
 
     move_uploaded_file($file['tmp_name'], $file_path . $file_name);
 }
@@ -578,8 +613,8 @@ function downloadImageLink($name, $getImgName = false) {
  * @return {string} Результат проверки
  */
 function validateUploadedFile($file) {
-    $fileType = $_FILES['userpic-file-photo']['type'];
-    $fileSize = $_FILES['userpic-file-photo']['size'];
+    $fileType = $file['type'];
+    $fileSize = $file['size'];
 
     $allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if ($fileSize > 0) {
@@ -610,6 +645,35 @@ function validateTags($tags) {
     return 'success';
 }
 
+function validateEmail($mail) {
+    $emailValid = filter_var($_POST[$mail], FILTER_VALIDATE_EMAIL);
+    if ($emailValid) {
+       return 'success';
+    }  else {
+        return 'Укажите корректной формат электронной почты';
+    }   
+}
+
+function validatePassword($password, $passwordRepeat) {
+    if ($_POST[$password] == $_POST[$passwordRepeat]) {
+       return 'success';
+    }  else {
+        return 'Пароль и его повтор не совпадают';
+    }   
+}
+
+function getFormValidateErrors($errorsList) {
+    $validateErrors = [];
+
+    foreach ($errorsList as $errorForm => $errorResultValues) {
+        foreach($errorResultValues as $errorResultValue) {
+            array_push($validateErrors, $errorResultValue);
+        }
+    }
+
+    return $validateErrors;
+}
+
 /**
  * Проверяет существование фото в папках
  * @param [$fileName] [string] [название файла]
@@ -627,6 +691,10 @@ function checkFilePath($fileName) {
 
     if (file_exists('uploads/link-images/' . $fileName)) {
         $imgPath = '/uploads/link-images/' . $fileName;
+    }
+
+    if (file_exists('uploads/users-avatar/' . $fileName)) {
+        $imgPath = '/uploads/users-avatar/' . $fileName;
     }
 
     return htmlspecialchars($imgPath);
