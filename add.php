@@ -59,13 +59,8 @@
         }
     }
     // формируем список ошибок
-    $validateErrors = [];
+    $validateErrors = getFormValidateErrors($formFieldsError);
 
-    foreach ($formFieldsError as $errorForm => $errorResultValues) {
-        foreach($errorResultValues as $errorResultValue) {
-            array_push($validateErrors, $errorResultValue);
-        }
-    }
     // если ошибок валидации нет, записываем данные в базу
     if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
         
@@ -96,7 +91,9 @@
         ];
             
         $postInsertDBresult = insertNewPost($data);
-
+        if (!$postInsertDBresult) {
+            $formFieldsError[$_POST['active-content-type']] = ['db-error' => 'Произошла ошибка при добавлении нового поста'];
+        }
         // если пост добавлен в базу, добавляем хештеги при наличии
         if ($postInsertDBresult) {
 

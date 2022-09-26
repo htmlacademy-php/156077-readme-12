@@ -40,7 +40,7 @@ require_once 'helpers.php';
             </div>
         </form>
         <div class="header__nav-wrapper">
-            <?php if ($isAuth == 1) : ?>
+            <?php if ($isAuth == 1 || parse_url($_SERVER['REQUEST_URI']) == '/registration.php') : ?>
                 <nav class="header__nav">
                     <ul class="header__my-nav">
                         <li class="header__my-page header__my-page--popular">
@@ -110,6 +110,15 @@ require_once 'helpers.php';
                         </li>
                     </ul>
                 </nav>
+            <?php else : ?>
+            <ul class="header__user-nav">
+                <li class="header__authorization">
+                    <a class="header__user-button header__authorization-button button" href="login.php">Вход</a>
+                </li>
+                <li>
+                    <a href="/registration.php" class="header__user-button header__user-button--active header__register-button button">Регистрация</a>
+                </li>
+            </ul>
             <?php endif; ?>
         </div>
     </div>
