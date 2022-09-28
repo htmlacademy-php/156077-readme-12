@@ -88,6 +88,7 @@
                 <span class="visually-hidden">количество репостов</span>
               </a>
             </div>
+            
             <span class="post__view"><?= $postData['views_count'];?> <?= ($postData['views_count']) ? get_noun_plural_form($postData['views_count'], 'просмотр', 'просмотра', 'просмотров') : ''; ?></span>
           </div>
           <ul class="post__tags">

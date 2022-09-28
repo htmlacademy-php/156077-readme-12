@@ -1,7 +1,7 @@
 <?php
     require_once 'helpers.php';
+    require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
-    $connectionDB = dbConnect();
 
     $requiredFields = ['email', 'login', 'password', 'password-repeat'];
     $fieldsHeader = [
@@ -19,11 +19,7 @@
         }
 
         if ($fieldName == 'email' && $formFieldsError['registration'][$fieldName] == 'success') {
-            $formFieldsError['registration'][$fieldName] = validateEmail($fieldName); 
-            
-            if ($formFieldsError['registration'][$fieldName] == 'success') {
-                $formFieldsError['registration'][$fieldName] = checkUserByEmail($fieldValue); 
-            }
+            $formFieldsError['registration'][$fieldName] = validateEmail($fieldValue); 
         }
 
         if ($fieldName == 'login' && $formFieldsError['registration'][$fieldName] == 'success') {
