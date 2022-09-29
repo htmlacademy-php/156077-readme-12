@@ -60,11 +60,11 @@ function getDBDataFromArray($sql, $data = NULL, $resultsType = 'single') {
     } else {     
         $varTypes = getVarTypes($data);      
         $stmt = $mysqli->prepare($sql);
+        
         if ($stmt) {
             $stmt->bind_param($varTypes, ...$data);
             $stmt->execute();
             $result = $stmt->get_result();    
-                
         } else {
             return false;
         }
@@ -257,6 +257,7 @@ function getQueryParam($paramName) {
 /**
  * Перемещает загруженный файл в папку
  * @param [$file] [file_object] [массив данных о файле из $_FILES]
+ * @param [$subDirectory] string] [дполнительная директива, отвечающая за подпапку для сохранения файла]
  * @return {none}
  */
 function moveUploadedImg($file, $subDirectory = '') {
@@ -276,9 +277,9 @@ function moveUploadedImg($file, $subDirectory = '') {
 
 function validateEmptyFilled($name) {
     if ($_POST[$name] == '') {
-        return 'Это поле должно быть заполнено';
+        return false;
     } else {
-        return 'success';
+        return true;
     }
 }
 
@@ -290,9 +291,9 @@ function validateEmptyFilled($name) {
 function validateLink($name) {
     $validateLink = filter_var($_POST[$name], FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
     if (!$validateLink) {
-        return 'Укажите корректную ссылку';
+        return false;
     } else {
-        return 'success';
+        return true;
     }
 }
 
@@ -352,11 +353,11 @@ function validateTags($tags) {
     $tags = explode(' ', $tags);
     foreach ($tags as $tagIndex => $tag) {
         if(!preg_match('/^[a-zа-яё]+$/iu', $tag)) {
-            return $tag . '- некорректный тег. Допустимы только русские или английские строчные символы. Разделяйте теги пробелом';
+            return false;
         }         
     }
 
-    return 'success';
+    return true;
 }
 
 /**
@@ -367,28 +368,55 @@ function validateTags($tags) {
 function validateEmail($mail) {
     $emailValid = filter_var($mail, FILTER_VALIDATE_EMAIL);
     if ($emailValid) {
-        return checkUserByEmail($mail);
+        return checkDBUserData('email', $mail);
     }  else {
-        return 'Укажите корректной формат электронной почты';
+        return false;
     }   
 }
 
 /**
- * Проверка почты пользователя на предмет существования в БД
- * @param [$mail] [string] [почта]
+ * Проверка наличия данных пользователя в БД
+ * @param [$value] [string] [столбец БД для проверки]
+ * @param [$value] [string] [значение для проверки]
  * @return {string} строка результата проверки
  */
-function checkUserByEmail($mail) {
+function checkDBUserData($fieldToCheck, $value) {
 
-    $sql = "SELECT id FROM users WHERE email = ?";
+    $userTableColumns = [
+        'email',
+        'login',
+    ];
 
-    $userMailExist = getDBDataFromArray($sql, [$mail])['id'];
-    var_dump($userMailExist);
-    if(!$userMailExist) {
-        return 'success'; 
+    if (!in_array($fieldToCheck, $userTableColumns)) {
+        return ['result' => 'db-column-error'];
     } else {
-        return 'Пользователь с таким email уже зарегистрирован';
-    }
+        if ($fieldToCheck == 'email') {
+            $sql = "SELECT id FROM users WHERE email = ?";
+        } elseif ($fieldToCheck == 'login') {
+            $sql = "SELECT id FROM users WHERE login = ?";
+        }
+        
+        $valueExist = getDBDataFromArray($sql, [$value])['id'];
+        if(!$valueExist) {
+            return ['result' => 'success']; 
+        } else {
+            return ['result' => 'value-exist-error'];
+        }
+    }  
+}
+
+/**
+ * Валидация логина
+ * @param [$login] [string] [логин]
+ * @return {string} Результат проверки
+ */
+function validateLogin($login) {
+    $loginValid = checkLoginLength($login);
+    if ($loginValid) {
+        return checkDBUserData('login', $login);
+    }  else {
+        return false;
+    }   
 }
 
 /**
@@ -396,21 +424,14 @@ function checkUserByEmail($mail) {
  * @param [$login] [string] [логин]
  * @return {string} строка результата проверки
  */
-function checkUserLogin($login) {
+function checkLoginLength($login) {
  
     if (strlen($login) > 20) {
-        return 'Логин не может превышать 20 символов';
-    }
-
-    $sql = "SELECT id FROM users WHERE login = ?";
-
-    $userLoginExist = getDBDataFromArray($sql, [$login])['id'];
-    var_dump($userLoginExist);
-    if(!$userLoginExist) {
-        return 'success'; 
+        return false;
     } else {
-        return 'занят';
+        return true;
     }
+
 }
 
 /**
@@ -421,9 +442,9 @@ function checkUserLogin($login) {
  */
 function validatePassword($password, $passwordRepeat) {
     if ($_POST[$password] == $_POST[$passwordRepeat]) {
-       return 'success';
+       return true;
     }  else {
-        return 'Пароль и его повтор не совпадают';
+        return false;
     }   
 }
 

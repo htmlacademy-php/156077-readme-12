@@ -23,28 +23,52 @@
     foreach ($_POST as $fieldName => $fieldValue) {
         //валидация на заполненность
         if (in_array($fieldName, $requiredFields)) {
-            $formFieldsError[$_POST['active-content-type']][$fieldName] = validateEmptyFilled($fieldName);
+            if (validateEmptyFilled($fieldName)) {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'success';
+            } else {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'Это поле должно быть заполнено';
+            }
         }
         // валидация на корректность ссылки
         if ($fieldName == 'form-link' || $fieldName == 'video-link') {   
-
-            $formFieldsError[$_POST['active-content-type']][$fieldName] = validateLink($fieldName);
-
-            if ($formFieldsError[$_POST['active-content-type']][$fieldName] == 'success' && $fieldName == 'video-link') {  
-                $formFieldsError[$_POST['active-content-type']][$fieldName] = check_youtube_url($_POST[$fieldName]);      
+            if (validateLink($fieldName)) {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'success';
+            } else {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'Укажите корректный формат ссылки';
+            }
+           
+            if ($formFieldsError[$_POST['active-content-type']][$fieldName] == 'success' && $fieldName == 'video-link') {
+                if (check_youtube_url($_POST[$fieldName])) {
+                    $formFieldsError[$_POST['active-content-type']][$fieldName] = 'success';
+                } else {
+                    $formFieldsError[$_POST['active-content-type']][$fieldName] = 'Видео по ссылке не найдено';
+                }  
+    
             }
         }
         // валидация фото-ссылки
         if ($fieldName == 'photo-link' && !empty($fieldValue)) {
-            $formFieldsError[$_POST['active-content-type']][$fieldName] = validateLink($fieldName);
+            if (validateLink($fieldName)) {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'success';
+            } else {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'Укажите корректный формат ссылки';
+            }
             
             if ($formFieldsError[$_POST['active-content-type']][$fieldName] == 'success' && $_FILES['userpic-file-photo']['size'] == 0) {
-                $formFieldsError[$_POST['active-content-type']][$fieldName] = downloadImageLink($fieldName);  
+                if (downloadImageLink($fieldName)) {
+                    $formFieldsError[$_POST['active-content-type']][$fieldName] = 'success';
+                } else {
+                    $formFieldsError[$_POST['active-content-type']][$fieldName] = 'Изображение по ссылке не найдено';
+                }
             }              
         }
         // валидация тегов
         if ($fieldName == 'form-tags' && !empty($fieldValue)) {
-            $formFieldsError[$_POST['active-content-type']][$fieldName] = validateTags($fieldValue);
+            if (validateTags($fieldValue)) {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'success';
+            } else {
+                $formFieldsError[$_POST['active-content-type']][$fieldName] = 'Некорректные теги. Допустимы только русские или английские строчные символы. Разделяйте теги пробелом';
+            }
         }
     }
     // добавление загружаемого фото

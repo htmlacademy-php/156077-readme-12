@@ -15,19 +15,46 @@
 
     foreach ($_POST as $fieldName => $fieldValue) {
         if (in_array($fieldName, $requiredFields)) {
-            $formFieldsError['registration'][$fieldName] = validateEmptyFilled($fieldName);
+            if (validateEmptyFilled($fieldName)) {
+                $formFieldsError['registration'][$fieldName] = 'success';
+            } else {
+                $formFieldsError['registration'][$fieldName] = 'Это поле должно быть заполнено';
+            }
+            
         }
 
         if ($fieldName == 'email' && $formFieldsError['registration'][$fieldName] == 'success') {
-            $formFieldsError['registration'][$fieldName] = validateEmail($fieldValue); 
+            var_dump(validateEmail($fieldValue));
+            if (validateEmail($fieldValue)['result'] == 'success') {
+                $formFieldsError['registration'][$fieldName] = 'success';
+            } elseif (validateEmail($fieldValue)['result'] == 'db-column-error') {
+                $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
+            } elseif (!empty(validateEmail($fieldValue)['result'] == 'value-exist-error')) {
+                $formFieldsError['registration'][$fieldName] = 'Пользователь с таким email уже зарегистрирован';
+            } elseif(!validateEmail($fieldValue)) {
+                $formFieldsError['registration'][$fieldName] = 'Укажите корректный формат почты';
+            }
+            var_dump($formFieldsError['registration'][$fieldName]);
         }
 
         if ($fieldName == 'login' && $formFieldsError['registration'][$fieldName] == 'success') {
-            $formFieldsError['registration'][$fieldName] = checkUserLogin($fieldValue);           
+            if (validateLogin($fieldValue)['result'] == 'success') {
+                $formFieldsError['registration'][$fieldName] = 'success';
+            } elseif (validateLogin($fieldValue)['result'] == 'db-column-error') {
+                $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
+            } elseif (validateLogin($fieldValue)['result'] == 'value-exist-error') {
+                $formFieldsError['registration'][$fieldName] = 'занят';  
+            } elseif (!validateLogin($fieldValue)) {
+                $formFieldsError['registration'][$fieldName] = 'Длина логина должна быть менее 20 символов';
+            }         
         }
 
         if ($fieldName == 'password' && $formFieldsError['registration'][$fieldName] == 'success') {
-            $formFieldsError['registration'][$fieldName] = validatePassword($fieldName, 'password-repeat');            
+            if (validatePassword($fieldName, 'password-repeat')) {
+                $formFieldsError['registration'][$fieldName] = 'success';
+            } else {
+                $formFieldsError['registration'][$fieldName] = 'Пароль и его повтор не совпадают';
+            }      
         }
     }
 
