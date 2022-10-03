@@ -29,7 +29,7 @@
                 $formFieldsError['registration'][$fieldName] = 'success';
             } elseif (validateEmail($fieldValue)['result'] == 'db-column-error') {
                 $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
-            } elseif (!empty(validateEmail($fieldValue)['result'] == 'value-exist-error')) {
+            } elseif (!empty(validateEmail($fieldValue)['result'] == 'value-exist')) {
                 $formFieldsError['registration'][$fieldName] = 'Пользователь с таким email уже зарегистрирован';
             } elseif(!validateEmail($fieldValue)) {
                 $formFieldsError['registration'][$fieldName] = 'Укажите корректный формат почты';
@@ -42,7 +42,7 @@
                 $formFieldsError['registration'][$fieldName] = 'success';
             } elseif (validateLogin($fieldValue)['result'] == 'db-column-error') {
                 $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
-            } elseif (validateLogin($fieldValue)['result'] == 'value-exist-error') {
+            } elseif (validateLogin($fieldValue)['result'] == 'value-exist') {
                 $formFieldsError['registration'][$fieldName] = 'занят';  
             } elseif (!validateLogin($fieldValue)) {
                 $formFieldsError['registration'][$fieldName] = 'Длина логина должна быть менее 20 символов';
@@ -91,7 +91,7 @@
             $formFieldsError['registration'] = ['db-error' => 'Произошла ошибка регистрации'];
         } else {
             header('HTTP/1.1 301 Moved Permanently');
-            header("Location: http://156077-readme-12");
+            header("Location: http://156077-readme-12/feed.php");
             exit();
         }
     }

@@ -1,4 +1,10 @@
 <?php
+    session_start();
+    if (!isset($_SESSION['user'])) {
+        header("Location: http://156077-readme-12/");
+        exit();
+    }
+
     require_once 'helpers.php';
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');

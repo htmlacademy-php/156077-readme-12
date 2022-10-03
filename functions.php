@@ -151,8 +151,6 @@ function insertPostTags($data, $insertTable) {
       
 }
 
-
-
 /**
  * Получает id типа поста по его имени
  * @param [$postTypeName] [string] [название типа поста]
@@ -400,9 +398,25 @@ function checkDBUserData($fieldToCheck, $value) {
         if(!$valueExist) {
             return ['result' => 'success']; 
         } else {
-            return ['result' => 'value-exist-error'];
+            return ['result' => 'value-exist'];
         }
     }  
+}
+
+/**
+ * Получает хеш пароля пользователя из БД
+ * @param [$login] [string] [логин]
+ * @return {string} хеш пароля или false
+ */
+function getUserPassword($login) {
+    $sql = "SELECT password FROM users WHERE login = ?";
+    $password = getDBDataFromArray($sql, [$login])['password'];
+
+    if ($password) {
+        return $password;
+    } else {
+        return false;
+    }
 }
 
 /**

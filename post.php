@@ -1,4 +1,10 @@
 <?php
+    session_start();
+    if (!isset($_SESSION['user'])) {
+        header("Location: http://156077-readme-12/");
+        exit();
+    }
+
     require_once 'helpers.php';
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
@@ -11,9 +17,7 @@
 
     $title = 'readme: пост ' . $postData['header'];
     $authorRegisterDate = new DateTime($postData['register_date']);
-    $isAuth = rand(0, 1);
-    $userName = 'Виктор';
-
+    $userName = $_SESSION['user'];
 ?>
 
 <?php

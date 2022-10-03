@@ -1,6 +1,5 @@
 <?php
 require_once 'helpers.php';
-
 ?>
 
 <!DOCTYPE html>
@@ -20,7 +19,7 @@ require_once 'helpers.php';
 <header class="header">
     <div class="header__wrapper container">
         <div class="header__logo-wrapper">
-            <a class="header__logo-link" href="main.html">
+            <a class="header__logo-link" href="feed.php">
                 <img class="header__logo" src="img/logo.svg" alt="Логотип readme" width="128" height="24">
             </a>
             <p class="header__topic">
@@ -40,16 +39,16 @@ require_once 'helpers.php';
             </div>
         </form>
         <div class="header__nav-wrapper">
-            <?php if ($isAuth == 1 || parse_url($_SERVER['REQUEST_URI']) == '/registration.php') : ?>
+            <?php if (parse_url($_SERVER['REQUEST_URI'])['path'] != '/registration.php') : ?>
                 <nav class="header__nav">
                     <ul class="header__my-nav">
                         <li class="header__my-page header__my-page--popular">
-                            <a class="header__page-link header__page-link--active" title="Популярный контент">
+                            <a href="popular.php" class="header__page-link <?= (parse_url($_SERVER['REQUEST_URI'])['path'] == '/popular.php') ? 'header__page-link--active' : '';?>" title="Популярный контент">
                                 <span class="visually-hidden">Популярный контент</span>
                             </a>
                         </li>
                         <li class="header__my-page header__my-page--feed">
-                            <a class="header__page-link" href="feed.html" title="Моя лента">
+                            <a class="header__page-link <?= (parse_url($_SERVER['REQUEST_URI'])['path'] == '/feed.php') ? 'header__page-link--active' : '';?>" href="feed.php" title="Моя лента">
                                 <span class="visually-hidden">Моя лента</span>
                             </a>
                         </li>
@@ -95,7 +94,7 @@ require_once 'helpers.php';
                                         </li>
 
                                         <li class="header__profile-nav-item">
-                                            <a class="header__profile-nav-link" href="#">
+                                            <a class="header__profile-nav-link" href="/logout.php">
                             <span class="header__profile-nav-text">
                                 Выход
                             </span>
@@ -111,14 +110,14 @@ require_once 'helpers.php';
                     </ul>
                 </nav>
             <?php else : ?>
-            <ul class="header__user-nav">
-                <li class="header__authorization">
-                    <a class="header__user-button header__authorization-button button" href="login.php">Вход</a>
-                </li>
-                <li>
-                    <a href="/registration.php" class="header__user-button header__user-button--active header__register-button button">Регистрация</a>
-                </li>
-            </ul>
+                <ul class="header__user-nav">
+                    <li class="header__authorization">
+                        <a class="header__user-button header__authorization-button button" href="/">Вход</a>
+                    </li>
+                    <li>
+                        <a href="/registration.php" class="header__user-button header__user-button--active header__register-button button">Регистрация</a>
+                    </li>
+                </ul>
             <?php endif; ?>
         </div>
     </div>
