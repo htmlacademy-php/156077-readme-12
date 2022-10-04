@@ -24,19 +24,18 @@
         }
 
         if ($fieldName == 'password' && $formFieldsError['authentification'][$fieldName] == 'success') {
-            if (getUserPassword($_POST['login'])) {
-                if (!password_verify($fieldValue, getUserPassword($_POST['login']))) {
+            if (checkUserPassword($_POST['login'])) {
+                if (!verifyUserAuthPassword($_POST['login'], $_POST['password'])) {
                     $formFieldsError['authentification'][$fieldName] = 'Пароли не совпадают';
                 } else {
                     $formFieldsError['authentification'][$fieldName] = 'success';
                 }   
             } else {
-                $formFieldsError['authentification'][$fieldName] = 'Пароль не найден для пользователя ' . $_POST['login'];
+                $formFieldsError['authentification'][$fieldName] = 'Пароль не существует для пользователя ' . $_POST['login'];
             }
              
         }
     }
-    var_dump($formFieldsError);
 
     // формируем список ошибок
     $validateErrors = getFormValidateErrors($formFieldsError);
@@ -45,7 +44,7 @@
     if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
         session_start();
         $_SESSION['user'] = $_POST['login'];
-        header("Location: http://156077-readme-12/feed.php");
+        header("Location: /feed.php");
     }
     
     $layout = include_template( 'login.php', [

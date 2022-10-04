@@ -1,7 +1,7 @@
 <?php
     session_start();
     if (!isset($_SESSION['user'])) {
-        header("Location: http://156077-readme-12/");
+        header("Location: /");
         exit();
     }
     require_once 'helpers.php';
@@ -13,7 +13,7 @@
     $condition = '';
     $filterPostTypeId = getQueryParam('post_type_id');
 
-    if ($filterPostTypeId != NULL && gettype($filterPostTypeId) != 'string') {
+    if (!empty($filterPostTypeId) && gettype((int)$filterPostTypeId) != 'string') {
         $postsData = getPosts($filterPostTypeId);
     } else {
         $postsData = getPosts();

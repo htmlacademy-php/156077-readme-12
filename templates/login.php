@@ -67,7 +67,7 @@
               </svg>
               <label class="visually-hidden">Логин</label>           
             </div>
-            <span class="form__error-label form__error-label--login"><?= $formFieldsError['authentification']['login'];?></span>
+            <span class="form__error-label form__error-label--login"><?= ($formFieldsError['authentification']['login'] != 'success') ? $formFieldsError['authentification']['login'] : '';?></span>
             <div class="authorization__input-wrapper form__input-wrapper form__input-section--error">
               <input class="authorization__input authorization__input--password form__input" type="password" name="password" placeholder="Пароль">
               <svg class="form__input-icon" width="16" height="20">

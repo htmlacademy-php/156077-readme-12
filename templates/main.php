@@ -38,14 +38,14 @@
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
                     <li class="popular__filters-item popular__filters-item--all filters__item filters__item--all">
-                        <a class="filters__button filters__button--ellipse filters__button--all <?= ($filterPostTypeId == 'none') ? 'filters__button--active' : ''; ?>" href="/">
+                        <a class="filters__button filters__button--ellipse filters__button--all <?= ($filterPostTypeId == 'none') ? 'filters__button--active' : ''; ?>" href="/popular.php">
                             <span>Все</span>
                         </a>
                     </li>
                     <?php foreach ($postTypes as $postType) : ?>
                         <?php if ($postType['name'] == 'post-photo') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--photo button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
+                                <a class="filters__button filters__button--photo button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/popular.php?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Фото</span>
                                     <svg class="filters__icon" width="22" height="18">
                                         <use xlink:href="#icon-filter-photo"></use>
@@ -56,7 +56,7 @@
 
                         <?php if ($postType['name'] == 'post-video') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--video button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
+                                <a class="filters__button filters__button--video button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/popular.php?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Видео</span>
                                     <svg class="filters__icon" width="24" height="16">
                                         <use xlink:href="#icon-filter-video"></use>
@@ -67,7 +67,7 @@
 
                         <?php if ($postType['name'] == 'post-text') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--text button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
+                                <a class="filters__button filters__button--text button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/popular.php?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Текст</span>
                                     <svg class="filters__icon" width="20" height="21">
                                         <use xlink:href="#icon-filter-text"></use>
@@ -78,7 +78,7 @@
 
                         <?php if ($postType['name'] == 'post-quote') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--quote button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
+                                <a class="filters__button filters__button--quote button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/popular.php?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Цитата</span>
                                     <svg class="filters__icon" width="21" height="20">
                                         <use xlink:href="#icon-filter-quote"></use>
@@ -89,7 +89,7 @@
 
                         <?php if ($postType['name'] == 'post-link') : ?>
                             <li class="popular__filters-item filters__item">
-                                <a class="filters__button filters__button--link button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/?post_type_id=<?= $postType['id']; ?>">
+                                <a class="filters__button filters__button--link button <?= ($filterPostTypeId == $postType['id']) ? 'filters__button--active' : ''; ?>" href="/popular.php?post_type_id=<?= $postType['id']; ?>">
                                     <span class="visually-hidden">Ссылка</span>
                                     <svg class="filters__icon" width="21" height="18">
                                         <use xlink:href="#icon-filter-link"></use>

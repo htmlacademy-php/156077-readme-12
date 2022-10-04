@@ -1,7 +1,7 @@
 <?php
     session_start();
     if (!isset($_SESSION['user'])) {
-        header("Location: http://156077-readme-12/");
+        header("Location: /");
         exit();
     }
 
