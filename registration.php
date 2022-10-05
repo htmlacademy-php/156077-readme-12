@@ -29,7 +29,7 @@
                 $formFieldsError['registration'][$fieldName] = 'success';
             } elseif (validateEmail($fieldValue)['result'] == 'db-column-error') {
                 $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
-            } elseif (!empty(validateEmail($fieldValue)['result'] == 'value-exist-error')) {
+            } elseif (!empty(validateEmail($fieldValue)['result'] == 'value-exist')) {
                 $formFieldsError['registration'][$fieldName] = 'Пользователь с таким email уже зарегистрирован';
             } elseif(!validateEmail($fieldValue)) {
                 $formFieldsError['registration'][$fieldName] = 'Укажите корректный формат почты';
@@ -42,7 +42,7 @@
                 $formFieldsError['registration'][$fieldName] = 'success';
             } elseif (validateLogin($fieldValue)['result'] == 'db-column-error') {
                 $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
-            } elseif (validateLogin($fieldValue)['result'] == 'value-exist-error') {
+            } elseif (validateLogin($fieldValue)['result'] == 'value-exist') {
                 $formFieldsError['registration'][$fieldName] = 'занят';  
             } elseif (!validateLogin($fieldValue)) {
                 $formFieldsError['registration'][$fieldName] = 'Длина логина должна быть менее 20 символов';
@@ -72,7 +72,7 @@
 
     
     // если ошибок валидации нет, записываем данные в базу
-    if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
+    if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
         $userEmail = (isset($_POST['email'])) ? filter_var($_POST['email'], FILTER_SANITIZE_STRING) : NULL;
         $userLogin = (isset($_POST['login'])) ? filter_var($_POST['login'], FILTER_SANITIZE_STRING) : NULL;
         $userPassword = (isset($_POST['password'])) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : NULL; 
@@ -91,7 +91,7 @@
             $formFieldsError['registration'] = ['db-error' => 'Произошла ошибка регистрации'];
         } else {
             header('HTTP/1.1 301 Moved Permanently');
-            header("Location: http://156077-readme-12");
+            header("Location: /feed.php");
             exit();
         }
     }

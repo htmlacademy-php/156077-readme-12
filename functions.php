@@ -1,10 +1,11 @@
 <?php
+declare(strict_types = 1);
 
 /**
  * Подключает к базе данных
  * @return {object} соединение с БД, либо выходит из скрипта
  */
-function dbConnection() {
+function dbConnection() : mysqli {
     $connectionMysql = new mysqli("localhost", "user", "Winserus89","readme"); 
     if ($connectionMysql == false) {
         exit("Ошибка подключения: " . mysqli_connect_error());
@@ -19,7 +20,7 @@ function dbConnection() {
  * @param $data Массив переменных
  * @return [string} строка типов переменных для подготовленного запроса
  */
-function getVarTypes($data) {
+function getVarTypes(array $data) : string {
     if (!$data) {
         return false;
     } else {
@@ -47,10 +48,10 @@ function getVarTypes($data) {
  * @param [$sql] [sql_query] [простой массив переменных]
  * @param [$data] [array] [простой массив переменных]
  * @param [$resultsType] [string] [формат возвращаемых данных]
- * @return {array} массив данных
+ * @return {mixed} массив данных или false
  */
 
-function getDBDataFromArray($sql, $data = NULL, $resultsType = 'single') {
+function getDBDataFromArray(string $sql, array $data = NULL, string $resultsType = 'single') {
     $mysqli = dbConnection();
     
     if (!$data) {
@@ -90,7 +91,7 @@ function getDBDataFromArray($sql, $data = NULL, $resultsType = 'single') {
  * @return {int} id добавленной записи
  */
 
-function insertDBDataFromArray($sql, $data) {
+function insertDBDataFromArray(string $sql, array $data) : int {
 
     if (!$data || !is_array($data)) {
         return false;
@@ -116,9 +117,9 @@ function insertDBDataFromArray($sql, $data) {
 /**
  * Записывает в базу данных новый пост
  * @param [$data [простой массив переменных с данными поста]
- * @return {int} id добавленной записи
+ * @return {mixed} id добавленной записи или false
  */
-function insertNewPost($data) {
+function insertNewPost(array $data) {
     $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     return insertDBDataFromArray($sqlPostPrepare, $data);
 }
@@ -126,7 +127,7 @@ function insertNewPost($data) {
 /**
  * Записывает в базу данных нового юзера
  * @param [$data] [простой массив переменных с данными юзера]
- * @return {int} id добавленной записи
+ * @return {mixed} id добавленной записи или false
  */
 function insertNewUser($data) {
     $sqlUserPrepare = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
@@ -137,7 +138,7 @@ function insertNewUser($data) {
  * Записывает в базу теги поста
  * @param [$data [простой массив переменных с данными тегов]
  * @param [$insertTable] [string] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
- * @return {int} id добавленной записи
+ * @return {mixed} id добавленной записи или false
  */
 function insertPostTags($data, $insertTable) {
     $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
@@ -151,15 +152,13 @@ function insertPostTags($data, $insertTable) {
       
 }
 
-
-
 /**
  * Получает id типа поста по его имени
  * @param [$postTypeName] [string] [название типа поста]
- * @return {int} id типа поста
+ * @return {mixed} id типа поста или false
  */
 
-function getPostTypeIdByName($postTypeName) {
+function getPostTypeIdByName(string $postTypeName) {
     $sql = "SELECT id FROM post_types WHERE name = ?";
     return getDBDataFromArray($sql, [$postTypeName])['id'];
 }
@@ -167,9 +166,9 @@ function getPostTypeIdByName($postTypeName) {
 /**
  * Получает id хештэга по его имени
  * @param [$tag] [string] [название хештега]
- * @return {int} id хештега
+ * @return {mixed} id хештега или false
  */
-function getHashtagIdByName($tag) {
+function getHashtagIdByName(string $tag) {
     $sql = "SELECT id FROM hashtags WHERE hashtag = ?";
     return getDBDataFromArray($sql, [$tag])['id'];
 }
@@ -177,9 +176,9 @@ function getHashtagIdByName($tag) {
 /**
  * Получает данные поста по его id
  * @param [$postId] [int] [id поста]
- * @return {array} массив данных поста
+ * @return {mixed} массив данных поста или false
  */
-function getPostData($postId) {
+function getPostData(int $postId) {
     $sql= "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
 
     return getDBDataFromArray($sql, [$postId]);
@@ -188,16 +187,16 @@ function getPostData($postId) {
 /**
  * Получает данные всех постов
  * @param [$postsTypeID] [int] [id типа поста для фильтрации]
- * @return {array} массив данных постов
+ * @return {mixed} массив данных постов или false
  */
-function getPosts($postsTypeID = '') {
+function getPosts(string $postsTypeID = '') {
     if ($postsTypeID != '') {
         $condition = 'WHERE posts.type_id = ?';
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, [$postsTypeID], 'all');
     } else {
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
-        return getDBDataFromArray($sql, false, 'all');
+        return getDBDataFromArray($sql, NULL, 'all');
     }
 }
 
@@ -206,25 +205,25 @@ function getPosts($postsTypeID = '') {
  * @param [$dataCount] [all] [значение столбца таблицы для подсчета]
  * @param [$dataCol] [string] [столбец таблицы]
  * @param [$table] [string] [название таблицы]
- * @return {int} количество записей с [$dataCount]
+ * @return {string} количество записей с [$dataCount]
  */
 
-function getDBDataCount($dataCount, $dataCol, $table) {
+function getDBDataCount(string $dataCount, string $dataCol, string $table) : string {
 
     $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
-    $result = getDBDataFromArray($sql, false, 'all');
+    $result = getDBDataFromArray($sql, NULL, 'all');
     
     return $result[0]['count'];
 }
 
 /**
  * Получает список типов постов
- * @return {array} массив типов постов
+ * @return {mixed} массив типов постов или false
  */
 
 function getPostTypes() {
     $sql = "SELECT * FROM post_types";
-    $postTypes = getDBDataFromArray($sql, false, 'all');
+    $postTypes = getDBDataFromArray($sql, NULL, 'all');
     
     return $postTypes;
 }
@@ -232,17 +231,17 @@ function getPostTypes() {
 /**
  * Получает значение параметра GET запроса
  * @param [$paramName] [string] [название параметра]
- * @return {all} значение переданного параметра или 'none', если параметра нет
+ * @return {string} значение переданного параметра или NULL, если параметра нет
  */
 
-function getQueryParam($paramName) {
+function getQueryParam(string $paramName) : string {
 
-    $paramValue = NULL;
+    $paramValue = '';
 
     if (!empty($_GET[$paramName])) {
 
         if ((int)$_GET[$paramName] != 0) {           
-            $paramValue = (int)$_GET[$paramName];                 
+            $paramValue = $_GET[$paramName];                 
         }
 
         if ((int)$_GET[$paramName] == 0) {
@@ -260,7 +259,7 @@ function getQueryParam($paramName) {
  * @param [$subDirectory] string] [дполнительная директива, отвечающая за подпапку для сохранения файла]
  * @return {none}
  */
-function moveUploadedImg($file, $subDirectory = '') {
+function moveUploadedImg(array $file, string $subDirectory = '') {
 
     $file_name = $file['name'];
     $file_path = __DIR__ . '/uploads/' . $subDirectory;
@@ -272,10 +271,10 @@ function moveUploadedImg($file, $subDirectory = '') {
 /**
  * Валидация на пустоту
  * @param [$name] [string] [имя поля]
- * @return {string} Результат проверки
+ * @return {bool} Результат проверки
  */
 
-function validateEmptyFilled($name) {
+function validateEmptyFilled(string $name) : bool {
     if ($_POST[$name] == '') {
         return false;
     } else {
@@ -286,9 +285,9 @@ function validateEmptyFilled($name) {
 /**
  * Валидация на корректность ссылки
  * @param [$name] [string] [имя поля]
- * @return {string} Результат проверки
+ * @return {bool} Результат проверки
  */
-function validateLink($name) {
+function validateLink(string $name) : bool {
     $validateLink = filter_var($_POST[$name], FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
     if (!$validateLink) {
         return false;
@@ -303,7 +302,7 @@ function validateLink($name) {
  * @param [$name] [bool] [если true, функция просто возрвразает название файла]
  * @return {string} скачивает фото, перемещает в папку и возвращает результат в текстовом формате
  */
-function downloadImageLink($name, $getImgName = false) {
+function downloadImageLink(string $name, bool $getImgName = false) : string {
     $imgUrl = $_POST[$name];
     $imgName = array_pop(explode('/', $imgUrl));
 
@@ -327,7 +326,7 @@ function downloadImageLink($name, $getImgName = false) {
  * @param [$file] [file_data] [массив данных файла из $_FILES]
  * @return {string} Результат проверки
  */
-function validateUploadedFile($file) {
+function validateUploadedFile(array $file) : string {
     $fileType = $file['type'];
     $fileSize = $file['size'];
 
@@ -347,9 +346,9 @@ function validateUploadedFile($file) {
 /**
  * Валидация тегов
  * @param [$tags] [string] [строка тегов]
- * @return {string} Результат проверки
+ * @return {bool} Результат проверки
  */
-function validateTags($tags) {
+function validateTags(string $tags) : bool {
     $tags = explode(' ', $tags);
     foreach ($tags as $tagIndex => $tag) {
         if(!preg_match('/^[a-zа-яё]+$/iu', $tag)) {
@@ -363,9 +362,9 @@ function validateTags($tags) {
 /**
  * Валидация почты
  * @param [$mail] [string] [почта]
- * @return {string} Результат проверки
+ * @return {mixed} Результат проверки или false
  */
-function validateEmail($mail) {
+function validateEmail(string $mail) {
     $emailValid = filter_var($mail, FILTER_VALIDATE_EMAIL);
     if ($emailValid) {
         return checkDBUserData('email', $mail);
@@ -376,11 +375,11 @@ function validateEmail($mail) {
 
 /**
  * Проверка наличия данных пользователя в БД
- * @param [$value] [string] [столбец БД для проверки]
+ * @param [$fieldToCheck] [string] [столбец БД для проверки]
  * @param [$value] [string] [значение для проверки]
- * @return {string} строка результата проверки
+ * @return {array} массив с ключом result и значением результата отработки функции
  */
-function checkDBUserData($fieldToCheck, $value) {
+function checkDBUserData(string $fieldToCheck, string $value) : array {
 
     $userTableColumns = [
         'email',
@@ -400,17 +399,45 @@ function checkDBUserData($fieldToCheck, $value) {
         if(!$valueExist) {
             return ['result' => 'success']; 
         } else {
-            return ['result' => 'value-exist-error'];
+            return ['result' => 'value-exist'];
         }
     }  
 }
 
 /**
+ * Получает хеш пароля пользователя из БД
+ * @param [$login] [string] [логин]
+ * @return {bool} результат проверки
+ */
+function verifyUserAuthPassword(string $login, string $password) : bool {
+    $sql = "SELECT password FROM users WHERE login = ?";
+    $DBpassword = getDBDataFromArray($sql, [$login])['password'];
+
+    return password_verify($password, $DBpassword);    
+}
+
+/**
+ * Проверяет записан ли пароль для переданного логина
+ * @param [$login] [string] [логин]
+ * @return {bool} результат проверки
+ */
+function checkUserPassword(string $login) : bool {
+    $sql = "SELECT password FROM users WHERE login = ?";
+    $DBpassword = getDBDataFromArray($sql, [$login])['password'];
+
+    if ($DBpassword) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/**
  * Валидация логина
  * @param [$login] [string] [логин]
- * @return {string} Результат проверки
+ * @return {mixed} Результат проверки или false
  */
-function validateLogin($login) {
+function validateLogin(string $login) {
     $loginValid = checkLoginLength($login);
     if ($loginValid) {
         return checkDBUserData('login', $login);
@@ -422,9 +449,9 @@ function validateLogin($login) {
 /**
  * Проверка логина пользователя на предмет существования в БД
  * @param [$login] [string] [логин]
- * @return {string} строка результата проверки
+ * @return {bool} результат проверки
  */
-function checkLoginLength($login) {
+function checkLoginLength(string $login) : bool {
  
     if (strlen($login) > 20) {
         return false;
@@ -436,11 +463,11 @@ function checkLoginLength($login) {
 
 /**
  * Валидация пароля
- * @param [$mail] [string] [пароль]
+ * @param [$password] [string] [пароль]
  * @param [$passwordRepeat] [string] [повтор пароля]
- * @return {string} Результат проверки
+ * @return {bool} Результат проверки
  */
-function validatePassword($password, $passwordRepeat) {
+function validatePassword(string $password, string $passwordRepeat) : bool {
     if ($_POST[$password] == $_POST[$passwordRepeat]) {
        return true;
     }  else {
@@ -449,11 +476,11 @@ function validatePassword($password, $passwordRepeat) {
 }
 
 /**
- * Валидация пароля
+ * Преобразования массива ошибок из нескольких форм в единый список разных ошибок
  * @param [$errorsList] [array] [многомерный массив с результатами проверки форм]
  * @return {array} Массив ошибок без учета к какой форме они относятся
  */
-function getFormValidateErrors($errorsList) {
+function getFormValidateErrors(array $errorsList) : array {
     $validateErrors = [];
 
     foreach ($errorsList as $errorForm => $errorResultValues) {
@@ -470,7 +497,7 @@ function getFormValidateErrors($errorsList) {
  * @param [$fileName] [string] [название файла]
  * @return {string} Путь к файлу
  */
-function checkFilePath($fileName) {
+function checkFilePath(string $fileName) : string {
 
     if (file_exists('img/' . $fileName)) {    
         $imgPath = '/img/' . $fileName;
@@ -494,11 +521,11 @@ function checkFilePath($fileName) {
 /**
  * Обрезает $text до $cropSybmols
  * @param [string] [$text] [текст для обрезки]
- * @param [number] [$cropSybmols] [до какого кол-ва символов обрезать]
+ * @param [int] [$cropSybmols] [до какого кол-ва символов обрезать]
  * @return {string} обрезанная строка со ссылкой Читать далее
  */
 
-function cropText($text, $cropSybmols = 300) {
+function cropText(string $text, int $cropSybmols = 300) : string {
     $words = explode(' ', $text);
     
     $symbolsCount = 0;
@@ -530,7 +557,7 @@ function cropText($text, $cropSybmols = 300) {
  * @return {string} количество времени прошедшего с $date до текущей даты в относительном формате
  */
 
-function getRelativeDateDifference ($date, $words) {
+function getRelativeDateDifference (DateTime $date, string $words) : string {
 
     $currentDate = new DateTime();
     $dateDiff = $date->diff($currentDate);
@@ -538,19 +565,19 @@ function getRelativeDateDifference ($date, $words) {
     $relativeDate = '';
     switch (true) {
         case ($dateDiff->days / 7 >= 5 ) :
-            return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
+            return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form((int)floor($dateDiff->m), 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
         
         case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
-            return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
+            return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form((int)floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
 
         case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
-            return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' ' . $words;
+            return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form((int)floor($dateDiff->d), 'день', 'дня', 'дней') . ' ' . $words;
         
         case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
-            return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' ' . $words;
+            return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form((int)floor($dateDiff->h), 'час', 'часа', 'часов') . ' ' . $words;
 
         case ($dateDiff->i > 0 && $dateDiff->i < 60) :
-            return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' ' . $words;
+            return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form((int)floor($dateDiff->i), 'минута', 'минуты', 'минут') . ' ' . $words;
 
         default:
             return $relativeDate = $date->format('d.m.Y H:i');
