@@ -72,7 +72,7 @@
 
     
     // если ошибок валидации нет, записываем данные в базу
-    if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
+    if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
         $userEmail = (isset($_POST['email'])) ? filter_var($_POST['email'], FILTER_SANITIZE_STRING) : NULL;
         $userLogin = (isset($_POST['login'])) ? filter_var($_POST['login'], FILTER_SANITIZE_STRING) : NULL;
         $userPassword = (isset($_POST['password'])) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : NULL; 
@@ -91,7 +91,7 @@
             $formFieldsError['registration'] = ['db-error' => 'Произошла ошибка регистрации'];
         } else {
             header('HTTP/1.1 301 Moved Permanently');
-            header("Location: http://156077-readme-12/feed.php");
+            header("Location: /feed.php");
             exit();
         }
     }

@@ -92,7 +92,7 @@
     $validateErrors = getFormValidateErrors($formFieldsError);
 
     // если ошибок валидации нет, записываем данные в базу
-    if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
+    if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
         
         $postTypeName = (isset($_POST['active-content-type'])) ? filter_var($_POST['active-content-type'], FILTER_SANITIZE_STRING) : NULL;
         $postHeader = (isset($_POST['form-heading'])) ? filter_var($_POST['form-heading'], FILTER_SANITIZE_STRING) : NULL;

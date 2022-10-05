@@ -565,19 +565,19 @@ function getRelativeDateDifference (DateTime $date, string $words) : string {
     $relativeDate = '';
     switch (true) {
         case ($dateDiff->days / 7 >= 5 ) :
-            return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form($dateDiff->m, 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
+            return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form((int)floor($dateDiff->m), 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
         
         case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
-            return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form(floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
+            return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form((int)floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
 
         case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
-            return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form($dateDiff->d, 'день', 'дня', 'дней') . ' ' . $words;
+            return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form((int)floor($dateDiff->d), 'день', 'дня', 'дней') . ' ' . $words;
         
         case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
-            return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form($dateDiff->h, 'час', 'часа', 'часов') . ' ' . $words;
+            return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form((int)floor($dateDiff->h), 'час', 'часа', 'часов') . ' ' . $words;
 
         case ($dateDiff->i > 0 && $dateDiff->i < 60) :
-            return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form($dateDiff->i, 'минута', 'минуты', 'минут') . ' ' . $words;
+            return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form((int)floor($dateDiff->i), 'минута', 'минуты', 'минут') . ' ' . $words;
 
         default:
             return $relativeDate = $date->format('d.m.Y H:i');

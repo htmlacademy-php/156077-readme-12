@@ -23,17 +23,12 @@
             }     
         }
 
-        if ($fieldName == 'password' && $formFieldsError['authentification'][$fieldName] == 'success') {
-            if (checkUserPassword($_POST['login'])) {
-                if (!verifyUserAuthPassword($_POST['login'], $_POST['password'])) {
-                    $formFieldsError['authentification'][$fieldName] = 'Пароли не совпадают';
-                } else {
-                    $formFieldsError['authentification'][$fieldName] = 'success';
-                }   
+        if ($fieldName == 'password' && $formFieldsError['authentification'][$fieldName] == 'success') {          
+            if (!verifyUserAuthPassword($_POST['login'], $_POST['password'])) {
+                $formFieldsError['authentification'][$fieldName] = 'Пароли не совпадают';
             } else {
-                $formFieldsError['authentification'][$fieldName] = 'Пароль не существует для пользователя ' . $_POST['login'];
-            }
-             
+                $formFieldsError['authentification'][$fieldName] = 'success';
+            }                      
         }
     }
 
@@ -41,7 +36,7 @@
     $validateErrors = getFormValidateErrors($formFieldsError);
 
     // если ошибок нет,открываем сессию
-    if (count(array_unique($validateErrors)) == 1 && array_unique($validateErrors)[0] == 'success') {
+    if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
         session_start();
         $_SESSION['user'] = $_POST['login'];
         header("Location: /feed.php");
