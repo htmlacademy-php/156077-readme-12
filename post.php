@@ -14,7 +14,6 @@
     if ($postId != NULL) {
         $postData = getPostData($postId);
     } 
-
     $title = 'readme: пост ' . $postData['header'];
     $authorRegisterDate = new DateTime($postData['register_date']);
     $userName = $_SESSION['user'];

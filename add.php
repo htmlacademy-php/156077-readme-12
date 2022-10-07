@@ -108,7 +108,8 @@
             $postImg = 'link-images/' . downloadImageLink('photo-link', true);
         }
         $postTypeId = getPostTypeIdByName($postTypeName);
-        $userID = 9;
+        $userID = (int)getUserDataByLogin($_SESSION['user'])['id'];
+        var_dump($userID);
         $data = [
             $userID,
             $postTypeId,

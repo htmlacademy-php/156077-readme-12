@@ -179,7 +179,7 @@ function getHashtagIdByName(string $tag) {
  * @return {mixed} массив данных поста или false
  */
 function getPostData(int $postId) {
-    $sql= "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
+    $sql= "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
 
     return getDBDataFromArray($sql, [$postId]);
 }
@@ -192,12 +192,22 @@ function getPostData(int $postId) {
 function getPosts(string $postsTypeID = '') {
     if ($postsTypeID != '') {
         $condition = 'WHERE posts.type_id = ?';
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, [$postsTypeID], 'all');
     } else {
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, NULL, 'all');
     }
+}
+
+/**
+ * Получает данные постов согласно критерию поиска
+ * @param [$searchQuery] [string] [Поисковая фраза]
+ * @return {mixed} массив данных постов или false
+ */
+function getSearchPosts(string $searchQuery) {
+    $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
+    return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 
 /**
@@ -251,6 +261,16 @@ function getQueryParam(string $paramName) : string {
     }
 
     return $paramValue;
+}
+
+/**
+ * Получает id пользователя по логину
+ * @param [$login] [sring] [массив данных о файле из $_FILES]
+ * @return {array} массив данных пользователя
+ */
+function getUserDataByLogin(string $login) : array {
+    $sql = "SELECT * FROM users WHERE login = '$login'";
+    return getDBDataFromArray($sql, NULL, 'single');
 }
 
 /**
