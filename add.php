@@ -94,21 +94,21 @@
     // если ошибок валидации нет, записываем данные в базу
     if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
         
-        $postTypeName = (isset($_POST['active-content-type'])) ? filter_var($_POST['active-content-type'], FILTER_SANITIZE_STRING) : NULL;
-        $postHeader = (isset($_POST['form-heading'])) ? filter_var($_POST['form-heading'], FILTER_SANITIZE_STRING) : NULL;
-        $postText = (isset($_POST['post-text'])) ? filter_var($_POST['post-text'], FILTER_SANITIZE_STRING) : NULL;
+        $postTypeName = (isset($_POST['active-content-type'])) ? filter_var($_POST['active-content-type'], FILTER_SANITIZE_STRING) : null;
+        $postHeader = (isset($_POST['form-heading'])) ? filter_var($_POST['form-heading'], FILTER_SANITIZE_STRING) : null;
+        $postText = (isset($_POST['post-text'])) ? filter_var($_POST['post-text'], FILTER_SANITIZE_STRING) : null;
         if (isset($_POST['quote-text'])) {
             $postText = filter_var($_POST['quote-text'], FILTER_SANITIZE_STRING);
         }
-        $postAuthor = (isset($_POST['quote-author'])) ? filter_var($_POST['quote-author'], FILTER_SANITIZE_STRING) : NULL;
-        $postLink = (isset($_POST['form-link'])) ? filter_var($_POST['form-link'], FILTER_SANITIZE_URL) : NULL;
-        $postVideo = (isset($_POST['video-link'])) ? filter_var($_POST['video-link'], FILTER_SANITIZE_URL) : NULL;
-        $postImg = (!empty($_FILES['userpic-file-photo']['name'])) ? $_FILES['userpic-file-photo']['name'] : NULL;
+        $postAuthor = (isset($_POST['quote-author'])) ? filter_var($_POST['quote-author'], FILTER_SANITIZE_STRING) : null;
+        $postLink = (isset($_POST['form-link'])) ? filter_var($_POST['form-link'], FILTER_SANITIZE_URL) : null;
+        $postVideo = (isset($_POST['video-link'])) ? filter_var($_POST['video-link'], FILTER_SANITIZE_URL) : null;
+        $postImg = (!empty($_FILES['userpic-file-photo']['name'])) ? $_FILES['userpic-file-photo']['name'] : null;
         if (empty($_FILES['userpic-file-photo']['name']) && !empty($_POST['photo-link'])) {
             $postImg = 'link-images/' . downloadImageLink('photo-link', true);
         }
         $postTypeId = getPostTypeIdByName($postTypeName);
-        $userID = (int)getUserDataByLogin($_SESSION['user'])['id'];
+        $userId = (int)getUserDataByLogin($_SESSION['user'])['id'];
 
         $data = [
             $userId,
@@ -128,7 +128,7 @@
         // если пост добавлен в базу, добавляем хештеги при наличии
         if ($postInsertDBresult) {
 
-            $tags = (isset($_POST['form-tags'])) ? explode(' ', filter_var($_POST['form-tags'], FILTER_SANITIZE_STRING)) : NULL;
+            $tags = (isset($_POST['form-tags'])) ? explode(' ', filter_var($_POST['form-tags'], FILTER_SANITIZE_STRING)) : null;
 
             if (!empty($_POST['form-tags'])) {
                 foreach ($tags as $tagIndex => $tag) {
@@ -162,4 +162,3 @@
     ]);     
     $layout = include_template( 'layout.php', ['content' => $content]);
     print($layout); 
-?>

@@ -11,7 +11,7 @@
 
     $postId = getQueryParam('post_id');
 
-    if ($postId != NULL) {
+    if ($postId != null) {
         $postData = getPostData($postId);
     } 
     $title = 'readme: пост ' . $postData['header'];
@@ -24,13 +24,10 @@
         $content = include_template( 'detail-post.php', ['postData' => $postData, 'registerDate' => $authorRegisterDate] );     
         $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName, 'isAuth' => $isAuth] );
         print($layout); 
-
     }  else {
-
         http_response_code(404);
         $content = include_template( '404.php'); 
         $layout = include_template( 'layout.php', ['content' => $content] );
-        print($layout); 
-        
+        print($layout);       
     }
-?>
+

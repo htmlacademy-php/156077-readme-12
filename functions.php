@@ -51,7 +51,7 @@ function getVarTypes(array $data) : string {
  * @return {mixed} массив данных или false
  */
 
-function getDBDataFromArray(string $sql, array $data = NULL, string $resultsType = 'single') {
+function getDBDataFromArray(string $sql, array $data = null, string $resultsType = 'single') {
     $mysqli = dbConnection();
     
     if (!$data) {
@@ -189,14 +189,14 @@ function getPostData(int $postId) {
  * @param [$postsTypeID] [int] [id типа поста для фильтрации]
  * @return {mixed} массив данных постов или false
  */
-function getPosts(string $postsTypeID = '') {
-    if ($postsTypeID != '') {
+function getPosts(string $postsTypeId = '') {
+    if ($postsTypeId != '') {
         $condition = 'WHERE posts.type_id = ?';
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
-        return getDBDataFromArray($sql, [$postsTypeID], 'all');
+        return getDBDataFromArray($sql, [$postsTypeId], 'all');
     } else {
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
-        return getDBDataFromArray($sql, NULL, 'all');
+        return getDBDataFromArray($sql, null, 'all');
     }
 }
 
@@ -221,7 +221,7 @@ function getSearchPosts(string $searchQuery) {
 function getDBDataCount(string $dataCount, string $dataCol, string $table) : string {
 
     $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
-    $result = getDBDataFromArray($sql, NULL, 'all');
+    $result = getDBDataFromArray($sql, null, 'all');
     
     return $result[0]['count'];
 }
@@ -233,7 +233,7 @@ function getDBDataCount(string $dataCount, string $dataCol, string $table) : str
 
 function getPostTypes() {
     $sql = "SELECT * FROM post_types";
-    $postTypes = getDBDataFromArray($sql, NULL, 'all');
+    $postTypes = getDBDataFromArray($sql, null, 'all');
     
     return $postTypes;
 }
@@ -241,7 +241,7 @@ function getPostTypes() {
 /**
  * Получает значение параметра GET запроса
  * @param [$paramName] [string] [название параметра]
- * @return {string} значение переданного параметра или NULL, если параметра нет
+ * @return {string} значение переданного параметра или null, если параметра нет
  */
 
 function getQueryParam(string $paramName) : string {
@@ -270,7 +270,7 @@ function getQueryParam(string $paramName) : string {
  */
 function getUserDataByLogin(string $login) : array {
     $sql = "SELECT * FROM users WHERE login = '$login'";
-    return getDBDataFromArray($sql, NULL, 'single');
+    return getDBDataFromArray($sql, null, 'single');
 }
 
 /**
