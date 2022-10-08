@@ -109,9 +109,9 @@
         }
         $postTypeId = getPostTypeIdByName($postTypeName);
         $userID = (int)getUserDataByLogin($_SESSION['user'])['id'];
-        var_dump($userID);
+
         $data = [
-            $userID,
+            $userId,
             $postTypeId,
             $postHeader,
             $postText,
