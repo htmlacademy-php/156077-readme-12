@@ -103,7 +103,7 @@
         </div>
        
         <div class="popular__posts">
-            <?php if ($postsData && is_array($postsData )) : ?>
+            <?php if ($postsData && is_array($postsData)) : ?>
                 <?php foreach ($postsData as $postIndex => $post) : ?>
                     <article class="popular__post post <?= $post['type_name']; ?>">
                         <header class="post__header">
@@ -156,16 +156,12 @@
                             <div class="post__author">
                                 <a class="post__author-link" href="#" title="Автор">
                                     <div class="post__avatar-wrapper">
-                                        <img class="post__author-avatar" src="img/<?= $post['avatar']; ?>" alt="Аватар пользователя">
+                                        <img class="post__author-avatar" src="<?= checkFilePath($post['avatar']); ?>" alt="Аватар пользователя">
                                     </div>
                                     <div class="post__info">
-                                        <b class="post__author-name"><?= htmlspecialchars($post['quote_author']); ?></b>
-
-                                        <?php
-                                            $randomDate = new DateTime(generate_random_date($postIndex));                              
-                                        ?>
-                                        
-                                        <time class="post__time" title="<?= $randomDate->format('d.m.Y H:i'); ?>" datetime="<?= $randomDate->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($randomDate, 'назад'); ?></time>
+                                        <b class="post__author-name"><?= $post['login']; ?></b>
+                                        <?php $date = new DateTime($post['create_date']); ?>                                
+                                        <time class="post__time" title="<?= $date->format('d.m.Y H:i'); ?>" datetime="<?= $date->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($date, 'назад'); ?></time>
                                     </div>
                                 </a>
                             </div>
@@ -185,7 +181,7 @@
                                         <svg class="post__indicator-icon" width="19" height="17">
                                             <use xlink:href="#icon-comment"></use>
                                         </svg>
-                                        <span>0</span>
+                                        <span><?= getDBDataCount($post['id'], 'post_id', 'comments'); ?></span>
                                         <span class="visually-hidden">количество комментариев</span>
                                     </a>
                                 </div>

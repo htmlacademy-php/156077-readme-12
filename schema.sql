@@ -36,6 +36,8 @@ CREATE TABLE posts (
   FOREIGN KEY (type_id) REFERENCES post_types (id) ON DELETE SET NULL
 );
 
+CREATE FULLTEXT INDEX post_search ON posts(header, post_text);
+
 CREATE TABLE hashtags (
   id INT AUTO_INCREMENT PRIMARY KEY,
   hashtag VARCHAR(10) UNIQUE NOT NULL

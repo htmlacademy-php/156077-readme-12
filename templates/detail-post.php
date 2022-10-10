@@ -165,12 +165,12 @@
           <div class="post-details__user-info user__info">
             <div class="post-details__avatar user__avatar">
               <a class="post-details__avatar-link user__avatar-link" href="#">
-                <img class="post-details__picture user__picture" src="img/<?= $postData['avatar']; ?>" alt="Аватар пользователя">
+                <img class="post-details__picture user__picture" src="<?= checkFilePath($postData['avatar']); ?>" alt="Аватар пользователя">
               </a>
             </div>
             <div class="post-details__name-wrapper user__name-wrapper">
               <a class="post-details__name user__name" href="#">
-                <span><?= $postData['quote_author']; ?></span>
+                <span><?= $postData['login']; ?></span>
               </a>
 
               <time class="post-details__time user__time" datetime="<?= $postData['register_date']; ?>"><?= getRelativeDateDifference($registerDate, 'на сайте'); ?></time>

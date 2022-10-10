@@ -1,4 +1,9 @@
 <?php
+    session_start();
+    if (isset($_SESSION['user'])) {
+        header("Location: /feed.php");
+        exit();
+    }
     require_once 'helpers.php';
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
@@ -47,4 +52,4 @@
         'formFieldsError' => $formFieldsError,
     ]);
     print($layout); 
-?>
+
