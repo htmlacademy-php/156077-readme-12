@@ -19,10 +19,31 @@
         $postsData = getPosts();
     }
 
+    $postsCount = count($postsData);
+    $postsToShow = 3;
+    $postPagesCount = ceil($postsCount / $postsToShow);
+    $currentPage = (getQueryParam('pagen')) ? (int)getQueryParam('pagen') : 1;
+    $nextPage = ($postPagesCount != $currentPage) ? $currentPage + 1 : -1;
+    $previousPage = $currentPage - 1;
+    $offset = ($currentPage - 1) * $postsToShow;
+    $paginationData = [
+        $postsToShow,
+        $offset
+    ];
+
+    $pagesData = [
+        'next' =>  $nextPage,
+        'previous' => $previousPage
+    ];
+
+    if ($postsCount > $postsToShow) {
+        $postsData = getPaginationPosts($paginationData);
+    }
+
     $title = 'readme: блог, каким он должен быть';
     $userName = $_SESSION['user'];
 
-    $content = include_template( 'main.php', ['postsData' => $postsData, 'postTypes' => $postTypes, 'filterPostTypeId' => $filterPostTypeId] );     
+    $content = include_template( 'content-popular.php', ['postsData' => $postsData, 'postTypes' => $postTypes, 'filterPostTypeId' => $filterPostTypeId, 'pagesData' => $pagesData] );     
     $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName]);
     print($layout); 
     
