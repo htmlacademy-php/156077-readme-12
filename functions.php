@@ -190,7 +190,7 @@ function getPostData(int $postId) {
  * @return {mixed} массив данных постов или false
  */
 function getPosts(string $postsTypeId = '') {
-    if ($postsTypeId != '') {
+    if (!empty($postsTypeId)) {
         $condition = 'WHERE posts.type_id = ?';
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, [$postsTypeId], 'all');
@@ -201,13 +201,23 @@ function getPosts(string $postsTypeId = '') {
 }
 
 /**
- * Получает данные всех постов
+ * Получает посты для пагинаций
  * @param [$postsTypeID] [int] [id типа поста для фильтрации]
+ * @param [$needFilter] [bool] [определяет нужен ли фильтр постов по типу]
  * @return {mixed} массив данных постов или false
  */
-function getPaginationPosts(array $data) {
-    $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC LIMIT ? OFFSET ?" ;
-    return getDBDataFromArray($sql, $data, 'all');
+function getPaginationPosts(array $data, bool $needFilter = false) {
+    if (!$needFilter) {
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC LIMIT ? OFFSET ?"; 
+        return getDBDataFromArray($sql, $data, 'all');     
+    } else {
+        $condition = 'WHERE posts.type_id = ?';
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC LIMIT ? OFFSET ?";
+        return getDBDataFromArray($sql, $data, 'all');
+    }
+
+   
+    
 }
 
 /**

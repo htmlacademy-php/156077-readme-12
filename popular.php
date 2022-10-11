@@ -26,17 +26,28 @@
     $nextPage = ($postPagesCount != $currentPage) ? $currentPage + 1 : -1;
     $previousPage = $currentPage - 1;
     $offset = ($currentPage - 1) * $postsToShow;
-    $paginationData = [
-        $postsToShow,
-        $offset
-    ];
-
+    if (!empty($filterPostTypeId)) {
+        $paginationData = [
+            $filterPostTypeId,
+            $postsToShow,
+            $offset
+        ];
+    } else {
+        $paginationData = [
+            $postsToShow,
+            $offset
+        ];
+    }
+    
+   
     $pagesData = [
         'next' =>  $nextPage,
         'previous' => $previousPage
     ];
 
-    if ($postsCount > $postsToShow) {
+    if ($postsCount > $postsToShow && !empty($filterPostTypeId)) {     
+        $postsData = getPaginationPosts($paginationData, true);
+    } elseif ($postsCount > $postsToShow && empty($filterPostTypeId)){
         $postsData = getPaginationPosts($paginationData);
     }
 

@@ -189,16 +189,16 @@
                         </footer>
                     </article>
                 <?php endforeach; ?>
-            <?php else : ?>
-                <p>Постов не найдено</p>
-            <?php endif; ?>
-            <div class="popular__page-links">
+                <div class="popular__page-links">
                 <?php if ($pagesData['previous'] !== 0) : ?>
-                    <a class="popular__page-link popular__page-link--prev button button--gray" href="/popular.php?pagen=<?= $pagesData['previous'] ;?>">Предыдущая страница</a>
+                    <a class="popular__page-link popular__page-link--prev button button--gray" href="/popular.php?pagen=<?= $pagesData['previous'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">Предыдущая страница</a>
                 <?php endif; ?>
                 <?php if ($pagesData['next'] !== -1) : ?>
-                    <a class="popular__page-link popular__page-link--next button button--gray" href="/popular.php?pagen=<?= $pagesData['next'] ;?>">Следующая страница</a>
+                    <a class="popular__page-link popular__page-link--next button button--gray" href="/popular.php?pagen=<?= $pagesData['next'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">Следующая страница</a>
                 <?php endif; ?>
             </div>
+            <?php else : ?>
+                <p>Постов не найдено</p>
+            <?php endif; ?>     
         </div>
     </div>
