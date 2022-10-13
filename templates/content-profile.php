@@ -37,18 +37,18 @@
           <b class="profile__tabs-caption filters__caption">Показать:</b>
           <ul class="profile__tabs-list filters__list tabs__list">
             <li class="profile__tabs-item filters__item">
-              <a class="profile__tabs-link filters__button filters__button--active tabs__item tabs__item--active button">Посты</a>
+              <a data-type="post" class="profile__tabs-link filters__button filters__button--active tabs__item tabs__item--active button js-tabs-item">Посты</a>
             </li>
             <li class="profile__tabs-item filters__item">
-              <a class="profile__tabs-link filters__button tabs__item button" href="#">Лайки</a>
+              <a data-type="likes" class="profile__tabs-link filters__button tabs__item button js-tabs-item" href="#">Лайки</a>
             </li>
             <li class="profile__tabs-item filters__item">
-              <a class="profile__tabs-link filters__button tabs__item button" href="#">Подписки</a>
+              <a data-type="subscribes" class="profile__tabs-link filters__button tabs__item button js-tabs-item" href="#">Подписки</a>
             </li>
           </ul>
         </div>
         <div class="profile__tab-content">
-          <section class="profile__posts tabs__content tabs__content--active">
+          <section data-type="post" class="profile__posts tabs__content tabs__content--active js-profile-tab-content">
             <h2 class="visually-hidden">Публикации</h2>
             <?php foreach ($postsData as $postIndex => $post) : ?>
                 <article class="profile__post post <?= $post['type_name']?>">
@@ -190,7 +190,7 @@
             </article>
           </section>
 
-          <section class="profile__likes tabs__content">
+          <section data-type="likes" class="profile__likes tabs__content js-profile-tab-content">
             <h2 class="visually-hidden">Лайки</h2>
             <ul class="profile__likes-list">
               <li class="post-mini post-mini--photo post user">
@@ -331,7 +331,7 @@
             </ul>
           </section>
 
-          <section class="profile__subscriptions tabs__content">
+          <section data-type="subscribes" class="profile__subscriptions tabs__content js-profile-tab-content">
             <h2 class="visually-hidden">Подписки</h2>
             <ul class="profile__subscriptions-list">
               <li class="post-mini post-mini--photo post user">

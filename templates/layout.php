@@ -10,6 +10,7 @@ require_once 'helpers.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?></title>
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dev.css">
 </head>
 <body class="page">
 <div style="display: none">

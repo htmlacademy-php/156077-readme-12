@@ -49,6 +49,38 @@
 })();
 
 (function () {
+  const profileTabContainer = document.querySelector(`.profile__tabs-list`); 
+  const profileTabs = document.querySelectorAll(`.js-profile-tab-content`);
+ 
+  if (profileTabContainer && profileTabs) {
+   const profileTypeTabs = profileTabContainer.querySelectorAll(`.js-tabs-item`);
+ 
+   profileTabContainer.addEventListener(`click`, (evt) => {
+     const target= evt.target;
+ 
+     if (target.closest(`.js-tabs-item`)) {
+        profileTypeTabs.forEach ((tab) => {
+         tab.classList.remove(`filters__button--active`);
+         target.classList.add(`filters__button--active`);
+       });
+ 
+       profileTabs.forEach((tab) => {
+ 
+         if (target.dataset.type !== tab.dataset.type) {
+          tab.classList.remove(`tabs__content--active`);
+         } else if (target.dataset.type === tab.dataset.type) {
+          tab.classList.add(`tabs__content--active`);
+         }
+         
+       })
+     }
+   })
+ 
+  }
+ 
+ })();
+
+(function () {
   var activeModal = document.querySelector('.modal--active');
   var modal = document.querySelector('.modal');
   var modalAdding = document.querySelector('.modal--adding');
