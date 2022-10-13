@@ -21,29 +21,7 @@
  const addingPostForms = document.querySelectorAll(`.js-adding-post-form`);
 
  if (addingPostContainer && addingPostForms) {
-  const addingPostTabs = addingPostContainer.querySelectorAll(`.js-adding-post-tab`);
-
-  addingPostContainer.addEventListener(`click`, (evt) => {
-    const target= evt.target;
-
-    if (target.closest(`.js-adding-post-tab`)) {
-      addingPostTabs.forEach ((tab) => {
-        tab.classList.remove(`filters__button--active`);
-        target.closest(`.js-adding-post-tab`).classList.add(`filters__button--active`);
-      });
-
-      addingPostForms.forEach((form) => {
-
-        if (target.closest(`.js-adding-post-tab`).dataset.type !== form.dataset.type) {
-          form.classList.remove(`tabs__content--active`);
-        } else if (target.closest(`.js-adding-post-tab`).dataset.type === form.dataset.type) {
-          form.classList.add(`tabs__content--active`);
-        }
-        
-      })
-    }
-  })
-
+  showTabs(addingPostContainer, `.js-adding-post-tab`, addingPostForms);
  }
 
 })();
@@ -53,32 +31,36 @@
   const profileTabs = document.querySelectorAll(`.js-profile-tab-content`);
  
   if (profileTabContainer && profileTabs) {
-   const profileTypeTabs = profileTabContainer.querySelectorAll(`.js-tabs-item`);
- 
-   profileTabContainer.addEventListener(`click`, (evt) => {
-     const target= evt.target;
- 
-     if (target.closest(`.js-tabs-item`)) {
-        profileTypeTabs.forEach ((tab) => {
-         tab.classList.remove(`filters__button--active`);
-         target.classList.add(`filters__button--active`);
-       });
- 
-       profileTabs.forEach((tab) => {
- 
-         if (target.dataset.type !== tab.dataset.type) {
-          tab.classList.remove(`tabs__content--active`);
-         } else if (target.dataset.type === tab.dataset.type) {
-          tab.classList.add(`tabs__content--active`);
-         }
-         
-       })
-     }
-   })
- 
+    showTabs(profileTabContainer, `.js-tabs-item`, profileTabs);
   }
  
- })();
+})();
+
+function showTabs(tabsContainer, tabsSelector, tabsContentElements) {
+  console.log(tabsSelector);
+  const tabs = tabsContainer.querySelectorAll(`${tabsSelector}`);
+
+  tabsContainer.addEventListener(`click`, (evt) => {
+    const target= evt.target;
+
+    if (target.closest(`${tabsSelector}`)) {
+      tabs.forEach ((tab) => {
+        tab.classList.remove(`filters__button--active`);
+        target.classList.add(`filters__button--active`);
+      });
+
+      tabsContentElements.forEach((contentTab) => {
+
+        if (target.closest(`${tabsSelector}`).dataset.type !== contentTab.dataset.type) {
+          contentTab.classList.remove(`tabs__content--active`);
+        } else if (target.closest(`${tabsSelector}`).dataset.type === contentTab.dataset.type) {
+          contentTab.classList.add(`tabs__content--active`);
+        }
+        
+      })
+    }
+  })
+}
 
 (function () {
   var activeModal = document.querySelector('.modal--active');
