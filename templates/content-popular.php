@@ -38,7 +38,7 @@
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
                     <li class="popular__filters-item popular__filters-item--all filters__item filters__item--all">
-                        <a class="filters__button filters__button--ellipse filters__button--all <?= ($filterPostTypeId == 'none') ? 'filters__button--active' : ''; ?>" href="/popular.php">
+                        <a class="filters__button filters__button--ellipse filters__button--all <?= (empty($filterPostTypeId)) ? 'filters__button--active' : ''; ?>" href="/popular.php">
                             <span>Все</span>
                         </a>
                     </li>
@@ -154,7 +154,7 @@
                         </div>
                         <footer class="post__footer">
                             <div class="post__author">
-                                <a class="post__author-link" href="#" title="Автор">
+                                <a class="post__author-link" href="/profile.php?user=<?= $post['login'];?>" title="Автор">
                                     <div class="post__avatar-wrapper">
                                         <img class="post__author-avatar" src="<?= checkFilePath($post['avatar']); ?>" alt="Аватар пользователя">
                                     </div>

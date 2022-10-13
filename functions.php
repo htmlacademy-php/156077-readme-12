@@ -129,18 +129,18 @@ function insertNewPost(array $data) {
  * @param [$data] [простой массив переменных с данными юзера]
  * @return {mixed} id добавленной записи или false
  */
-function insertNewUser($data) {
+function insertNewUser(array $data) {
     $sqlUserPrepare = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
     return insertDBDataFromArray($sqlUserPrepare, $data);
 }
 
 /**
  * Записывает в базу теги поста
- * @param [$data [простой массив переменных с данными тегов]
+ * @param [$data] [array] [простой массив переменных с данными тегов]
  * @param [$insertTable] [string] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
  * @return {mixed} id добавленной записи или false
  */
-function insertPostTags($data, $insertTable) {
+function insertPostTags(array $data, string $insertTable) {
     $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
     $sqlTagsPrepare = "INSERT INTO hashtags (hashtag) VALUES (?)";
 
@@ -150,6 +150,17 @@ function insertPostTags($data, $insertTable) {
         return insertDBDataFromArray($sqlTagsPostsPrepare, $data);
     }
       
+}
+
+/**
+ * Произовдит подписку на пользователя
+ * @param [$subscriberId] [int] [id подписывающегося юзера]
+ * @param [$subscribedUserId] [int] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
+ * @return {mixed} id добавленной записи или false
+ */
+function subscribeUser(int $subscriberId, int $subscribedUserId) {
+    $sql = "INSERT INTO subscribes (subscriber_id, subscribed_user_id) VALUES (?, ?)";
+    return insertDBDataFromArray($sql, [$subscriberId, $subscribedUserId]);
 }
 
 /**
@@ -186,18 +197,35 @@ function getPostData(int $postId) {
 
 /**
  * Получает данные всех постов
- * @param [$postsTypeID] [int] [id типа поста для фильтрации]
+ * @param [$postsTypeID] [string] [id типа поста для фильтрации]
  * @return {mixed} массив данных постов или false
  */
 function getPosts(string $postsTypeId = '') {
     if (!empty($postsTypeId)) {
-        $condition = 'WHERE posts.type_id = ?';
+        $condition = "WHERE posts.type_id = ?";
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, [$postsTypeId], 'all');
     } else {
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, null, 'all');
     }
+}
+
+/**
+ * Получает посты юзера
+ * @param [$userId ] [string] [id типа поста для фильтрации]
+ * @param [$postsTypeID] [string] [id типа поста для фильтрации]
+ * @return {mixed} массив данных постов или false
+ */
+function getUserPosts(string $userId = '', string $postsTypeId = '') {
+    if (!empty($postsTypeId)) { 
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.user_id = ? AND posts.type_id = ? ORDER BY posts.views_count DESC";
+        return getDBDataFromArray($sql, [$userId, $postsTypeId], 'all');
+    } else {
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.user_id = ? ORDER BY posts.views_count DESC";
+        return getDBDataFromArray($sql, [$userId], 'all');
+    }
+   
 }
 
 /**
@@ -214,10 +242,7 @@ function getPaginationPosts(array $data, bool $needFilter = false) {
         $condition = 'WHERE posts.type_id = ?';
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC LIMIT ? OFFSET ?";
         return getDBDataFromArray($sql, $data, 'all');
-    }
-
-   
-    
+    } 
 }
 
 /**
@@ -226,7 +251,7 @@ function getPaginationPosts(array $data, bool $needFilter = false) {
  * @return {mixed} массив данных постов или false
  */
 function getSearchPosts(string $searchQuery) {
-    $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
+    $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 
@@ -242,7 +267,7 @@ function getDBDataCount(string $dataCount, string $dataCol, string $table) : str
 
     $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
     $result = getDBDataFromArray($sql, null, 'all');
-    
+
     return $result[0]['count'];
 }
 
@@ -256,6 +281,18 @@ function getPostTypes() {
     $postTypes = getDBDataFromArray($sql, null, 'all');
     
     return $postTypes;
+}
+
+/**
+ * Получает списокхештегов поста
+ * @param [$postId] [int] [id поста]
+ * @return {mixed} массив тегов или false
+ */
+function getHashtags(int $postId) {
+    $sql = "SELECT hashtag FROM hashtags LEFT JOIN hashtags_posts ON hashtags.id = hashtags_posts.hashtag_id WHERE hashtags_posts.post_id = '$postId'";
+    $hashtags = getDBDataFromArray($sql, null, 'all');
+    
+    return $hashtags;
 }
 
 /**

@@ -78,7 +78,7 @@ require_once 'helpers.php';
                                 <div class="header__profile-tooltip">
                                     <ul class="header__profile-nav">
                                         <li class="header__profile-nav-item">
-                                            <a class="header__profile-nav-link" href="#">
+                                            <a class="header__profile-nav-link" href="/profile.php">
                             <span class="header__profile-nav-text">
                                 Мой профиль
                             </span>
