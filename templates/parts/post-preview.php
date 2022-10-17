@@ -12,13 +12,13 @@
     </header>
     <div class="post__main">
         <?php if ($post['type_name'] == 'post-photo') : ?>
-        <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
-        <div class="post-photo__image-wrapper"> <img src="<?= checkFilePath($post['post_image']); ?>" alt="Фото от пользователя" width="760" height="396"> </div>
+            <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
+            <div class="post-photo__image-wrapper"> <img src="<?= checkFilePath($post['post_image']); ?>" alt="Фото от пользователя" width="760" height="396"> </div>
         <?php elseif ($post['type_name'] == 'post-text') : ?>
-        <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
-        <p>
-            <?= cropText($post['post_text'], 200); ?>
-        </p>
+            <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
+            <p>
+                <?= cropText($post['post_text'], 200); ?>
+            </p>
         <?php elseif ($post['type_name'] == 'post-video') : ?>
         <div class="post-video__block">
             <div class="post-video__preview">

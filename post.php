@@ -22,7 +22,7 @@
 <?php
     if ($postData) {
         $content = include_template( 'detail-post.php', ['postData' => $postData, 'registerDate' => $authorRegisterDate] );     
-        $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName, 'isAuth' => $isAuth] );
+        $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName] );
         print($layout); 
     }  else {
         http_response_code(404);

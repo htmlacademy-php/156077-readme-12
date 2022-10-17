@@ -85,6 +85,31 @@ function getDBDataFromArray(string $sql, array $data = null, string $resultsType
 }
 
 /**
+ * Удаляет данные из БД подготовкой sql выражения
+ * @param [$sql] [sql_query] [простой массив переменных]
+ * @param [$data] [array] [простой массив переменных]
+ * @return {mixed} массив данных или false
+ */
+function deleteDBDataFromArray(string $sql, array $data) {
+    $mysqli = dbConnection();
+    
+    if (!$data) {
+        return false;
+    } else {     
+        $varTypes = getVarTypes($data);      
+        $stmt = $mysqli->prepare($sql);
+        
+        if ($stmt) {
+            $stmt->bind_param($varTypes, ...$data);
+            $stmt->execute();
+            $result = $stmt->get_result();    
+        }   
+    }
+
+    return $result;  
+}
+
+/**
  * Делает запись в БД из массива переменных
  * @param [$data] [простой массив переменных]
  * @param [$sql] [sql string] [sql запрос]
@@ -262,13 +287,44 @@ function getSearchPosts(string $searchQuery) {
  * @param [$table] [string] [название таблицы]
  * @return {string} количество записей с [$dataCount]
  */
-
 function getDBDataCount(string $dataCount, string $dataCol, string $table) : string {
 
     $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
     $result = getDBDataFromArray($sql, null, 'all');
 
     return $result[0]['count'];
+}
+
+ /**
+ * Получает массив id подписок
+ * @param [$subscribedUserId] [int] [id юзера, подписчиков, которого нужно получить]
+ * @return {miixed} массив id подписанных юзеров или false
+ */
+function getSubscribers(int $subscriber_id) {
+    $sql = "SELECT subscribed_user_id FROM subscribes WHERE subscriber_id = ?";
+    return deleteDBDataFromArray($sql, [$subscriber_id], 'all'); 
+}
+
+/**
+ * Получает id пользователя по логину
+ * @param [$subscribeUserId] [int] [id юзера, на которого подписка]
+ * @param [$userId] [int] [id подписчика]
+ * @return {mixed} id записи или false
+ */
+function checkSubscription(int $subscribeUserId, int $userId ) {
+    $sql = "SELECT id FROM subscribes WHERE subscriber_id = ? AND subscribed_user_id = ?";
+    return getDBDataFromArray($sql, [$userId, $subscribeUserId], 'single');
+}
+
+/**
+ * Удаляет запись о подписке
+ * @param [$subscribedUserId] [int] [id юзера, на которого подписка]
+ * @param [$userId] [int] [id подписчика]
+ * @return {mixed} id записи или false
+ */
+function deleteSubscription(int $subscribedUserId, int $userId) : bool {
+    $sql =  "DELETE FROM subscribes WHERE subscriber_id = ? AND subscribed_user_id = ?";
+    return deleteDBDataFromArray($sql, [$userId, $subscribedUserId]);
 }
 
 /**
@@ -322,11 +378,21 @@ function getQueryParam(string $paramName) : string {
 
 /**
  * Получает id пользователя по логину
- * @param [$login] [sring] [массив данных о файле из $_FILES]
+ * @param [$login] [sring] [логин пользователя]
  * @return {array} массив данных пользователя
  */
 function getUserDataByLogin(string $login) : array {
     $sql = "SELECT * FROM users WHERE login = '$login'";
+    return getDBDataFromArray($sql, null, 'single');
+}
+
+/**
+ * Получает id пользователя по логину
+ * @param [$login] [sring] [id пользователя]
+ * @return {array} массив данных пользователя
+ */
+function getUserDataById(int $id) : array {
+    $sql = "SELECT * FROM users WHERE id = '$id'";
     return getDBDataFromArray($sql, null, 'single');
 }
 

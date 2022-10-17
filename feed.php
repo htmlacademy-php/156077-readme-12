@@ -13,8 +13,6 @@ $title = 'Моя лента';
 $userName = $_SESSION['user'];
 
 $userData = getUserDataByLogin($userName);
-
-
 $postTypes = getPostTypes();
 $filterPostTypeId = getQueryParam('post_type_id');
 

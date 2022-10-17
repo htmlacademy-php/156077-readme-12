@@ -64,11 +64,11 @@ require_once 'helpers.php';
                         <li class="header__profile">
                             <a class="header__profile-link" href="#">
                                 <div class="header__avatar-wrapper">
-                                    <img class="header__profile-avatar" src="img/userpic-medium.jpg" alt="Аватар профиля">
+                                    <img class="header__profile-avatar" src="<?= checkFilePath(getUserDataByLogin($userName)['avatar']); ?>" alt="Аватар профиля">
                                 </div>
                                 <div class="header__profile-name">
                                     <span>
-                                        <?=$userName; ?>
+                                        <?= $userName; ?>
                                     </span>
                                     <svg class="header__link-arrow" width="10" height="6">
                                         <use xlink:href="#icon-arrow-right-ad"></use>
