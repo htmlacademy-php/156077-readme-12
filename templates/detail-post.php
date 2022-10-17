@@ -63,7 +63,7 @@
 
           <div class="post__indicators">
             <div class="post__buttons">
-              <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+              <a class="post__indicator post__indicator--likes button" href="/like.php?post_id=<?= $postData['id']; ?>" title="Лайк">
                 <svg class="post__indicator-icon" width="20" height="17">
                   <use xlink:href="#icon-heart"></use>
                 </svg>
@@ -92,12 +92,13 @@
             <span class="post__view"><?= $postData['views_count'];?> <?= ($postData['views_count']) ? get_noun_plural_form($postData['views_count'], 'просмотр', 'просмотра', 'просмотров') : ''; ?></span>
           </div>
           <ul class="post__tags">
-            <li><a href="#">#nature</a></li>
-            <li><a href="#">#globe</a></li>
-            <li><a href="#">#photooftheday</a></li>
-            <li><a href="#">#canon</a></li>
-            <li><a href="#">#landscape</a></li>
-            <li><a href="#">#щикарныйвид</a></li>
+            <?php if (!empty(getHashtags($postData['id']))) : ?>
+                <ul class="post__tags">
+                    <?php foreach (getHashtags($postData['id']) as $tagIndex => $tag) : ?>      
+                        <li><a href="#">#<?= $tag['hashtag']; ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
           </ul>
           <div class="comments">
             <form class="comments__form form" action="#" method="post">
@@ -187,7 +188,7 @@
             </p>
           </div>
           <div class="post-details__user-buttons user__buttons">
-            <button class="user__button user__button--subscription button button--main" type="button">Подписаться</button>
+            <a href="/profile.php?subscribe_user=<?=$postData['user_id']; ?>" class="user__button user__button--subscription button button--main" >Подписаться</a>
             <a class="user__button user__button--writing button button--green" href="#">Сообщение</a>
           </div>
         </div>

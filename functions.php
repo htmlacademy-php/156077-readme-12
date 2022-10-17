@@ -88,7 +88,7 @@ function getDBDataFromArray(string $sql, array $data = null, string $resultsType
  * Удаляет данные из БД подготовкой sql выражения
  * @param [$sql] [sql_query] [простой массив переменных]
  * @param [$data] [array] [простой массив переменных]
- * @return {mixed} массив данных или false
+ * @return {mixed} результат stmp или false
  */
 function deleteDBDataFromArray(string $sql, array $data) {
     $mysqli = dbConnection();
@@ -140,13 +140,24 @@ function insertDBDataFromArray(string $sql, array $data) : int {
 }
 
 /**
+ * Записывает в базу данных новый лайк поста
+ * @param [$postId] [id поста]
+ * @param [$userId] [id юзера]
+ * @return {mixed} id добавленной записи или false
+ */
+function addPostLike(int $postId, int $userId) : int {
+    $sql = "INSERT INTO likes (user_id, post_id) VALUES (?, ?)";
+    return insertDBDataFromArray($sql, [$userId, $postId]);
+}
+
+/**
  * Записывает в базу данных новый пост
- * @param [$data [простой массив переменных с данными поста]
+ * @param [$data] [простой массив переменных с данными поста]
  * @return {mixed} id добавленной записи или false
  */
 function insertNewPost(array $data) {
-    $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    return insertDBDataFromArray($sqlPostPrepare, $data);
+    $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    return insertDBDataFromArray($sql, $data);
 }
 
 /**
@@ -155,8 +166,8 @@ function insertNewPost(array $data) {
  * @return {mixed} id добавленной записи или false
  */
 function insertNewUser(array $data) {
-    $sqlUserPrepare = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
-    return insertDBDataFromArray($sqlUserPrepare, $data);
+    $sql = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
+    return insertDBDataFromArray($sql, $data);
 }
 
 /**

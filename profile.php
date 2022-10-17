@@ -34,7 +34,8 @@ if (!empty($subscribeUserId)) {
     } else {
         $subscribeNotice = 'Вы подписались на пользователя';
     }
-    //header("Location: /profile.php?user=$subscribedUserLogin");
+    $prevUrl = $_SERVER['HTTP_REFERER'];
+    header("Location: $prevUrl");
 }
 
 $subscribers = getSubscribers($userData['id']);

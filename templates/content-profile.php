@@ -105,22 +105,22 @@
                     <footer class="post__footer">
                         <div class="post__indicators">
                             <div class="post__buttons">
-                                <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
-                                <svg class="post__indicator-icon" width="20" height="17">
-                                    <use xlink:href="#icon-heart"></use>
-                                </svg>
-                                <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
-                                    <use xlink:href="#icon-heart-active"></use>
-                                </svg>
-                                <span><?= getDBDataCount($post['id'], 'post_id', 'likes'); ?></span>
-                                <span class="visually-hidden">количество лайков</span>
+                                <a class="post__indicator post__indicator--likes button" href="/like.php?post_id=<?= $post['id']; ?>" title="Лайк">
+                                  <svg class="post__indicator-icon" width="20" height="17">
+                                      <use xlink:href="#icon-heart"></use>
+                                  </svg>
+                                  <svg class="post__indicator-icon post__indicator-icon--like-active" width="20" height="17">
+                                      <use xlink:href="#icon-heart-active"></use>
+                                  </svg>
+                                  <span><?= getDBDataCount($post['id'], 'post_id', 'likes'); ?></span>
+                                  <span class="visually-hidden">количество лайков</span>
                                 </a>
                                 <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
-                                <svg class="post__indicator-icon" width="19" height="17">
-                                    <use xlink:href="#icon-repost"></use>
-                                </svg>
-                                <span>5</span>
-                                <span class="visually-hidden">количество репостов</span>
+                                  <svg class="post__indicator-icon" width="19" height="17">
+                                      <use xlink:href="#icon-repost"></use>
+                                  </svg>
+                                  <span>5</span>
+                                  <span class="visually-hidden">количество репостов</span>
                                 </a>
                             </div>
                             <time class="post__time"><?= getRelativeDateDifference(new DateTime($post['create_date']), 'назад'); ?></time>
@@ -341,12 +341,12 @@
                   <li class="post-mini post-mini--photo post user">
                     <div class="post-mini__user-info user__info">
                       <div class="post-mini__avatar user__avatar">
-                        <a class="user__avatar-link" href="/profile.php?user<?= $subscriber['login']; ?>">
+                        <a class="user__avatar-link" href="/profile.php?user=<?= $subscriber['login']; ?>">
                           <img class="post-mini__picture user__picture" src="<?= checkFilePath($subscriber['avatar']); ?>" alt="Аватар пользователя">
                         </a>
                       </div>
                       <div class="post-mini__name-wrapper user__name-wrapper">
-                        <a class="post-mini__name user__name" href="/profile.php?user<?= $subscriber['login']; ?>">
+                        <a class="post-mini__name user__name" href="/profile.php?user=<?= $subscriber['login']; ?>">
                           <span><?= $subscriber['login']; ?> <?= ($subscriber['id'] === $userId) ? ' (Это вы)' : ''; ?></span>
                         </a>
                         <time class="post-mini__time user__additional" datetime="<?= $subscriber['register_date']; ?>"><?= getRelativeDateDifference(new DateTime($subscriber['register_date']), 'на сайте'); ?></time>
