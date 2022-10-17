@@ -161,6 +161,16 @@ function insertNewPost(array $data) {
 }
 
 /**
+ * Записывает в базу данных новый коммент
+ * @param [$data] [простой массив переменных с данными комментария]
+ * @return {mixed} id добавленной записи или false
+ */
+function insertNewComment(array $data) {
+    $sql = "INSERT INTO comments (user_id, post_id, comment) VALUES (?, ?, ?)";
+    return insertDBDataFromArray($sql, $data);
+}
+
+/**
  * Записывает в базу данных нового юзера
  * @param [$data] [простой массив переменных с данными юзера]
  * @return {mixed} id добавленной записи или false
@@ -227,8 +237,17 @@ function getHashtagIdByName(string $tag) {
  */
 function getPostData(int $postId) {
     $sql= "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
-
     return getDBDataFromArray($sql, [$postId]);
+}
+
+/**
+ * Получает комментарии к посту
+ * @param [$postId] [int] [id поста]
+ * @return {mixed} массив комментариев или false
+ */
+function getPostComments(int $postId) {
+    $sql = "SELECT comments.*, users.avatar, users.login FROM comments LEFT JOIN users ON users.id = comments.user_id WHERE comments.post_id = ?";
+    return getDBDataFromArray($sql, [$postId], 'all');
 }
 
 /**
@@ -313,7 +332,17 @@ function getDBDataCount(string $dataCount, string $dataCol, string $table) : str
  */
 function getSubscribers(int $subscriber_id) {
     $sql = "SELECT subscribed_user_id FROM subscribes WHERE subscriber_id = ?";
-    return deleteDBDataFromArray($sql, [$subscriber_id], 'all'); 
+    return getDBDataFromArray($sql, [$subscriber_id], 'all'); 
+}
+
+ /**
+ * Получает массив постов пользователя, которым ставили лайк
+ * @param [$userId] [int] [id юзера, лаки постов, которого нужно получить]
+ * @return {miixed} массив id подписанных юзеров или false
+ */
+function getLikedUserPosts(int $userId) {
+    $sql = "SELECT posts.*, likes.user_id as like_from_user, likes.like_date, users.login, users.avatar FROM posts LEFT JOIN likes ON likes.post_id = posts.id LEFT JOIN users ON likes.user_id = users.id WHERE posts.user_id = ? AND posts.id = likes.post_id;";
+    return getDBDataFromArray($sql, [$userId], 'all'); 
 }
 
 /**
@@ -592,7 +621,7 @@ function checkUserPassword(string $login) : bool {
  * @return {mixed} Результат проверки или false
  */
 function validateLogin(string $login) {
-    $loginValid = checkLoginLength($login);
+    $loginValid = checkLength($login, 20);
     if ($loginValid) {
         return checkDBUserData('login', $login);
     }  else {
@@ -605,9 +634,9 @@ function validateLogin(string $login) {
  * @param [$login] [string] [логин]
  * @return {bool} результат проверки
  */
-function checkLoginLength(string $login) : bool {
+function checkLength(string $text, int $length) : bool {
  
-    if (strlen($login) > 20) {
+    if (strlen($text) > $length) {
         return false;
     } else {
         return true;

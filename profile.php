@@ -23,6 +23,10 @@ if (!empty($userProfileName)) {
 
 $postTypes = getPostTypes();
 $userPosts = getUserPosts($userData['id']);
+foreach ($userPosts as $postIndex => $post) {
+    $comments = getPostComments($post['id']);
+    $userPosts[$postIndex]['comments'] = $comments;
+}
 
 $subscribeUserId = getQueryParam('subscribe_user');
 $subscribeNotice = '';
@@ -38,6 +42,60 @@ if (!empty($subscribeUserId)) {
     header("Location: $prevUrl");
 }
 
+$subscribedUserId = getQueryParam('unactive_subscriber_id');
+if (!empty($subscribedUserId) && checkSubscription($subscribedUserId, $userId)) {
+    deleteSubscription($subscribedUserId, $userId);
+    header("Location: /profile.php");
+}
+
+$requiredFields = ['comment-text'];
+$formFieldsError = [];
+
+foreach ($_POST as $fieldName => $fieldValue) {
+    //валидация на заполненность
+    if (in_array($fieldName, $requiredFields)) {
+        if (validateEmptyFilled($fieldName)) {
+            $formFieldsError['comment-form'][$fieldName] = 'success';
+        } else {
+            $formFieldsError['comment-form'][$fieldName] = 'Это поле должно быть заполнено';
+        }
+        
+        if ($formFieldsError['comment-form'][$fieldName] == 'success') {
+
+            if (!checkLength($fieldValue, 4)) {
+                $formFieldsError['comment-form'][$fieldName] = 'success';
+            } else {
+                $formFieldsError['comment-form'][$fieldName] = 'Длина комментария должна быть больше четырех символов';
+            }         
+        } 
+
+        if ($fieldName == 'post-id' && getPost($fieldValue)) {
+            $formFieldsError['comment-form'][$fieldName] = 'success';
+        } else {
+            $formFieldsError['comment-form'][$fieldName] = 'Пост не доступен';
+        }
+    } 
+}
+
+$validateErrors = getFormValidateErrors($formFieldsError);
+
+if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
+    $commentUser = (int)getUserDataByLogin($userName)['id'];
+    $postId = (isset($_POST['post-id'])) ? filter_var($_POST['post-id'], FILTER_SANITIZE_NUMBER_INT) : null;
+    $commentText = (isset($_POST['comment-text'])) ? filter_var($_POST['comment-text'], FILTER_SANITIZE_STRING) : null;  
+
+    $data = [
+        $commentUser,
+        $postId,
+        $commentText    
+    ];
+    
+    $commentInsertDBresult = insertNewComment($data);
+
+    $postAuthor = $userData['login'];
+    header("Location: /profile.php?user=$postAuthor");
+}
+
 $subscribers = getSubscribers($userData['id']);
 $subscribersData = [];
 
@@ -47,11 +105,7 @@ if (!empty($subscribers) && $subscribers) {
     }
 }
 
-$subscribedUserId = getQueryParam('unactive_subscriber_id');
-if (!empty($subscribedUserId) && checkSubscription($subscribedUserId, $userId)) {
-    deleteSubscription($subscribedUserId, $userId);
-    header("Location: /profile.php");
-}
+$likes = getLikedUserPosts($userData['id']);
 
 $content = include_template('content-profile.php', [
     'userData' => $userData, 
@@ -59,7 +113,9 @@ $content = include_template('content-profile.php', [
     'postTypes' => $postTypes, 
     'subscribeNotice' => $subscribeNotice,
     'subscribersData' => $subscribersData,
-    'userId' => $userId
+    'likesData' => $likes,
+    'userId' => $userId,
+    'formFieldsError' => $formFieldsError
 ]);     
 $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName]);
 print($layout); 
