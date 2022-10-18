@@ -63,7 +63,7 @@
 
           <div class="post__indicators">
             <div class="post__buttons">
-              <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+              <a class="post__indicator post__indicator--likes button" href="/like.php?post_id=<?= $postData['id']; ?>" title="Лайк">
                 <svg class="post__indicator-icon" width="20" height="17">
                   <use xlink:href="#icon-heart"></use>
                 </svg>
@@ -92,67 +92,44 @@
             <span class="post__view"><?= $postData['views_count'];?> <?= ($postData['views_count']) ? get_noun_plural_form($postData['views_count'], 'просмотр', 'просмотра', 'просмотров') : ''; ?></span>
           </div>
           <ul class="post__tags">
-            <li><a href="#">#nature</a></li>
-            <li><a href="#">#globe</a></li>
-            <li><a href="#">#photooftheday</a></li>
-            <li><a href="#">#canon</a></li>
-            <li><a href="#">#landscape</a></li>
-            <li><a href="#">#щикарныйвид</a></li>
+            <?php if (!empty(getHashtags($postData['id']))) : ?>
+                <ul class="post__tags">
+                    <?php foreach (getHashtags($postData['id']) as $tagIndex => $tag) : ?>      
+                        <li><a href="#">#<?= $tag['hashtag']; ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
           </ul>
           <div class="comments">
-            <form class="comments__form form" action="#" method="post">
-              <div class="comments__my-avatar">
-                <img class="comments__picture" src="img/userpic-medium.jpg" alt="Аватар пользователя">
-              </div>
-              <div class="form__input-section form__input-section--error">
-                <textarea class="comments__textarea form__textarea form__input" placeholder="Ваш комментарий"></textarea>
-                <label class="visually-hidden">Ваш комментарий</label>
-                <button class="form__error-button button" type="button">!</button>
-                <div class="form__error-text">
-                  <h3 class="form__error-title">Ошибка валидации</h3>
-                  <p class="form__error-desc">Это поле обязательно к заполнению</p>
-                </div>
-              </div>
-              <button class="comments__submit button button--green" type="submit">Отправить</button>
-            </form>
+            <?php print(include_template('comment-form.php', [
+              'userName' => $userName, 
+              'formError' => $formFieldsError, 
+              'postId' => $postData['id']])
+            ); ?>
             <div class="comments__list-wrapper">
               <ul class="comments__list">
-                <li class="comments__item user">
-                  <div class="comments__avatar">
-                    <a class="user__avatar-link" href="#">
-                      <img class="comments__picture" src="img/userpic-larisa.jpg" alt="Аватар пользователя">
-                    </a>
-                  </div>
-                  <div class="comments__info">
-                    <div class="comments__name-wrapper">
-                      <a class="comments__user-name" href="#">
-                        <span>Лариса Роговая</span>
-                      </a>
-                      <time class="comments__time" datetime="2019-03-20">1 ч назад</time>
-                    </div>
-                    <p class="comments__text">
-                      Красота!!!1!
-                    </p>
-                  </div>
-                </li>
-                <li class="comments__item user">
-                  <div class="comments__avatar">
-                    <a class="user__avatar-link" href="#">
-                      <img class="comments__picture" src="img/userpic-larisa.jpg" alt="Аватар пользователя">
-                    </a>
-                  </div>
-                  <div class="comments__info">
-                    <div class="comments__name-wrapper">
-                      <a class="comments__user-name" href="#">
-                        <span>Лариса Роговая</span>
-                      </a>
-                      <time class="comments__time" datetime="2019-03-18">2 дня назад</time>
-                    </div>
-                    <p class="comments__text">
-                      Озеро Байкал – огромное древнее озеро в горах Сибири к северу от монгольской границы. Байкал считается самым глубоким озером в мире. Он окружен сетью пешеходных маршрутов, называемых Большой байкальской тропой. Деревня Листвянка, расположенная на западном берегу озера, – популярная отправная точка для летних экскурсий. Зимой здесь можно кататься на коньках и собачьих упряжках.
-                    </p>
-                  </div>
-                </li>
+                <?php if (!empty($comments)) : ?>
+                  <?php foreach($comments as $commentIndex => $comment) : ?>
+                    <li class="comments__item user">
+                      <div class="comments__avatar">
+                        <a class="user__avatar-link" href="/profile.php?user=<?= $comment['login']; ?>">
+                          <img class="comments__picture" src="<?= checkFilePath($comment['avatar']); ?>" alt="Аватар пользователя">
+                        </a>
+                      </div>
+                      <div class="comments__info">
+                        <div class="comments__name-wrapper">
+                          <a class="comments__user-name" href="/profile.php?user=<?= $comment['login']; ?>">
+                            <span><?= $comment['login'];?></span>
+                          </a>
+                          <time class="comments__time" datetime="<?= $comment['create_date']; ?>"><?= getRelativeDateDifference(new DateTime($comment['create_date']), 'назад'); ?></time>
+                        </div>
+                        <p class="comments__text">
+                          <?= $comment['comment'];?>
+                        </p>
+                      </div>
+                    </li>
+                  <?php endforeach; ?>
+                <?php endif; ?>
               </ul>
               <a class="comments__more-link" href="#">
                 <span>Показать все комментарии</span>
@@ -169,11 +146,11 @@
               </a>
             </div>
             <div class="post-details__name-wrapper user__name-wrapper">
-              <a class="post-details__name user__name" href="#">
+              <a class="post-details__name user__name" href="/profile.php?user=<?= $postData['login']; ?>">
                 <span><?= $postData['login']; ?></span>
               </a>
 
-              <time class="post-details__time user__time" datetime="<?= $postData['register_date']; ?>"><?= getRelativeDateDifference($registerDate, 'на сайте'); ?></time>
+              <time class="post-details__time user__time" datetime="<?= $postData['register_date']; ?>"><?= getRelativeDateDifference(new DateTime($postData['register_date']), 'на сайте'); ?></time>
             </div>
           </div>
           <div class="post-details__rating user__rating">
@@ -187,7 +164,7 @@
             </p>
           </div>
           <div class="post-details__user-buttons user__buttons">
-            <button class="user__button user__button--subscription button button--main" type="button">Подписаться</button>
+            <a href="/profile.php?subscribe_user=<?=$postData['user_id']; ?>" class="user__button user__button--subscription button button--main" >Подписаться</a>
             <a class="user__button user__button--writing button button--green" href="#">Сообщение</a>
           </div>
         </div>

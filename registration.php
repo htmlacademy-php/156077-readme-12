@@ -24,7 +24,6 @@
         }
 
         if ($fieldName == 'email' && $formFieldsError['registration'][$fieldName] == 'success') {
-            var_dump(validateEmail($fieldValue));
             if (validateEmail($fieldValue)['result'] == 'success') {
                 $formFieldsError['registration'][$fieldName] = 'success';
             } elseif (validateEmail($fieldValue)['result'] == 'db-column-error') {
@@ -34,7 +33,6 @@
             } elseif(!validateEmail($fieldValue)) {
                 $formFieldsError['registration'][$fieldName] = 'Укажите корректный формат почты';
             }
-            var_dump($formFieldsError['registration'][$fieldName]);
         }
 
         if ($fieldName == 'login' && $formFieldsError['registration'][$fieldName] == 'success') {
@@ -44,7 +42,7 @@
                 $formFieldsError['registration'][$fieldName] = 'Ошибка проверки существования ' . $fieldName;
             } elseif (validateLogin($fieldValue)['result'] == 'value-exist') {
                 $formFieldsError['registration'][$fieldName] = 'занят';  
-            } elseif (!validateLogin($fieldValue)) {
+            } elseif (!validateLogin($fieldValue)['result']) {
                 $formFieldsError['registration'][$fieldName] = 'Длина логина должна быть менее 20 символов';
             }         
         }

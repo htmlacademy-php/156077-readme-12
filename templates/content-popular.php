@@ -38,7 +38,7 @@
                 <b class="popular__filters-caption filters__caption">Тип контента:</b>
                 <ul class="popular__filters-list filters__list">
                     <li class="popular__filters-item popular__filters-item--all filters__item filters__item--all">
-                        <a class="filters__button filters__button--ellipse filters__button--all <?= ($filterPostTypeId == 'none') ? 'filters__button--active' : ''; ?>" href="/popular.php">
+                        <a class="filters__button filters__button--ellipse filters__button--all <?= (empty($filterPostTypeId)) ? 'filters__button--active' : ''; ?>" href="/popular.php">
                             <span>Все</span>
                         </a>
                     </li>
@@ -154,7 +154,7 @@
                         </div>
                         <footer class="post__footer">
                             <div class="post__author">
-                                <a class="post__author-link" href="#" title="Автор">
+                                <a class="post__author-link" href="/profile.php?user=<?= $post['login'];?>" title="Автор">
                                     <div class="post__avatar-wrapper">
                                         <img class="post__author-avatar" src="<?= checkFilePath($post['avatar']); ?>" alt="Аватар пользователя">
                                     </div>
@@ -167,7 +167,7 @@
                             </div>
                             <div class="post__indicators">
                                 <div class="post__buttons">
-                                    <a class="post__indicator post__indicator--likes button" href="#" title="Лайк">
+                                    <a class="post__indicator post__indicator--likes button" href="/like.php?post_id=<?= $post['id']; ?>" title="Лайк">
                                         <svg class="post__indicator-icon" width="20" height="17">
                                             <use xlink:href="#icon-heart"></use>
                                         </svg>
@@ -189,8 +189,16 @@
                         </footer>
                     </article>
                 <?php endforeach; ?>
+                <div class="popular__page-links">
+                <?php if ($pagesData['previous'] !== 0) : ?>
+                    <a class="popular__page-link popular__page-link--prev button button--gray" href="/popular.php?pagen=<?= $pagesData['previous'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">Предыдущая страница</a>
+                <?php endif; ?>
+                <?php if ($pagesData['next'] !== -1) : ?>
+                    <a class="popular__page-link popular__page-link--next button button--gray" href="/popular.php?pagen=<?= $pagesData['next'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">Следующая страница</a>
+                <?php endif; ?>
+            </div>
             <?php else : ?>
                 <p>Постов не найдено</p>
-            <?php endif; ?>
+            <?php endif; ?>     
         </div>
     </div>

@@ -68,6 +68,7 @@ CREATE TABLE likes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   post_id INT NOT NULL,
+  like_date DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE liked_post (user_id, post_id),
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE

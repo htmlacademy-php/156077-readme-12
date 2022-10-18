@@ -21,32 +21,46 @@
  const addingPostForms = document.querySelectorAll(`.js-adding-post-form`);
 
  if (addingPostContainer && addingPostForms) {
-  const addingPostTabs = addingPostContainer.querySelectorAll(`.js-adding-post-tab`);
+  showTabs(addingPostContainer, `.js-adding-post-tab`, addingPostForms);
+ }
 
-  addingPostContainer.addEventListener(`click`, (evt) => {
+})();
+
+(function () {
+  const profileTabContainer = document.querySelector(`.profile__tabs-list`); 
+  const profileTabs = document.querySelectorAll(`.js-profile-tab-content`);
+ 
+  if (profileTabContainer && profileTabs) {
+    showTabs(profileTabContainer, `.js-tabs-item`, profileTabs);
+  }
+ 
+})();
+
+function showTabs(tabsContainer, tabsSelector, tabsContentElements) {
+  console.log(tabsSelector);
+  const tabs = tabsContainer.querySelectorAll(`${tabsSelector}`);
+
+  tabsContainer.addEventListener(`click`, (evt) => {
     const target= evt.target;
 
-    if (target.closest(`.js-adding-post-tab`)) {
-      addingPostTabs.forEach ((tab) => {
+    if (target.closest(`${tabsSelector}`)) {
+      tabs.forEach ((tab) => {
         tab.classList.remove(`filters__button--active`);
-        target.closest(`.js-adding-post-tab`).classList.add(`filters__button--active`);
+        target.classList.add(`filters__button--active`);
       });
 
-      addingPostForms.forEach((form) => {
+      tabsContentElements.forEach((contentTab) => {
 
-        if (target.closest(`.js-adding-post-tab`).dataset.type !== form.dataset.type) {
-          form.classList.remove(`tabs__content--active`);
-        } else if (target.closest(`.js-adding-post-tab`).dataset.type === form.dataset.type) {
-          form.classList.add(`tabs__content--active`);
+        if (target.closest(`${tabsSelector}`).dataset.type !== contentTab.dataset.type) {
+          contentTab.classList.remove(`tabs__content--active`);
+        } else if (target.closest(`${tabsSelector}`).dataset.type === contentTab.dataset.type) {
+          contentTab.classList.add(`tabs__content--active`);
         }
         
       })
     }
   })
-
- }
-
-})();
+}
 
 (function () {
   var activeModal = document.querySelector('.modal--active');

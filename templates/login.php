@@ -76,7 +76,7 @@
               <label class="visually-hidden">Пароль</label>
               <span class="form__error-label"><?= $postRequestData['password'];?></span>
             </div>
-            <span class="form__error-label"><?= $formFieldsError['authentification']['password'];?></span>
+            <span class="form__error-label"><?= ($formFieldsError['authentification']['password'] != 'success') ? $formFieldsError['authentification']['password'] : '';?></span>
             <a class="authorization__recovery" href="#">Восстановить пароль</a>
             <button class="authorization__submit button button--main" type="submit">Войти</button>
           </form>

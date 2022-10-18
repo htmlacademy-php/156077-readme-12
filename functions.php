@@ -51,13 +51,13 @@ function getVarTypes(array $data) : string {
  * @return {mixed} массив данных или false
  */
 
-function getDBDataFromArray(string $sql, array $data = null, string $resultsType = 'single') {
+function getDBDataFromArray(string $sql, array $data = null, string $resultsType = 'single') : ?array {
     $mysqli = dbConnection();
     
     if (!$data) {
         $result = $mysqli->query($sql);
     } elseif (!is_array($data)) {
-        return false;
+        return null;
     } else {     
         $varTypes = getVarTypes($data);      
         $stmt = $mysqli->prepare($sql);
@@ -67,7 +67,7 @@ function getDBDataFromArray(string $sql, array $data = null, string $resultsType
             $stmt->execute();
             $result = $stmt->get_result();    
         } else {
-            return false;
+            return null;
         }
         
         $mysqli->close();            
@@ -82,6 +82,31 @@ function getDBDataFromArray(string $sql, array $data = null, string $resultsType
 
     return $result;
     
+}
+
+/**
+ * Удаляет данные из БД подготовкой sql выражения
+ * @param [$sql] [sql_query] [простой массив переменных]
+ * @param [$data] [array] [простой массив переменных]
+ * @return {mixed} результат stmp или false
+ */
+function deleteDBDataFromArray(string $sql, array $data) : bool {
+    $mysqli = dbConnection();
+    
+    if (!$data) {
+        return false;
+    } else {     
+        $varTypes = getVarTypes($data);      
+        $stmt = $mysqli->prepare($sql);
+        
+        if ($stmt) {
+            $stmt->bind_param($varTypes, ...$data);
+            $stmt->execute();
+            $result = $stmt->get_result();    
+        }   
+
+        return true;  
+    } 
 }
 
 /**
@@ -115,13 +140,34 @@ function insertDBDataFromArray(string $sql, array $data) : int {
 }
 
 /**
- * Записывает в базу данных новый пост
- * @param [$data [простой массив переменных с данными поста]
+ * Записывает в базу данных новый лайк поста
+ * @param [$postId] [id поста]
+ * @param [$userId] [id юзера]
  * @return {mixed} id добавленной записи или false
  */
-function insertNewPost(array $data) {
-    $sqlPostPrepare = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    return insertDBDataFromArray($sqlPostPrepare, $data);
+function addPostLike(int $postId, int $userId) : int {
+    $sql = "INSERT INTO likes (user_id, post_id) VALUES (?, ?)";
+    return insertDBDataFromArray($sql, [$userId, $postId]);
+}
+
+/**
+ * Записывает в базу данных новый пост
+ * @param [$data] [простой массив переменных с данными поста]
+ * @return {mixed} id добавленной записи или false
+ */
+function insertNewPost(array $data) : int {
+    $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    return insertDBDataFromArray($sql, $data);
+}
+
+/**
+ * Записывает в базу данных новый коммент
+ * @param [$data] [простой массив переменных с данными комментария]
+ * @return {mixed} id добавленной записи или false
+ */
+function insertNewComment(array $data) : int {
+    $sql = "INSERT INTO comments (user_id, post_id, comment) VALUES (?, ?, ?)";
+    return insertDBDataFromArray($sql, $data);
 }
 
 /**
@@ -129,18 +175,18 @@ function insertNewPost(array $data) {
  * @param [$data] [простой массив переменных с данными юзера]
  * @return {mixed} id добавленной записи или false
  */
-function insertNewUser($data) {
-    $sqlUserPrepare = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
-    return insertDBDataFromArray($sqlUserPrepare, $data);
+function insertNewUser(array $data) : int {
+    $sql = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
+    return insertDBDataFromArray($sql, $data);
 }
 
 /**
  * Записывает в базу теги поста
- * @param [$data [простой массив переменных с данными тегов]
+ * @param [$data] [array] [простой массив переменных с данными тегов]
  * @param [$insertTable] [string] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
  * @return {mixed} id добавленной записи или false
  */
-function insertPostTags($data, $insertTable) {
+function insertPostTags(array $data, string $insertTable) : int {
     $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
     $sqlTagsPrepare = "INSERT INTO hashtags (hashtag) VALUES (?)";
 
@@ -153,12 +199,23 @@ function insertPostTags($data, $insertTable) {
 }
 
 /**
+ * Произовдит подписку на пользователя
+ * @param [$subscriberId] [int] [id подписывающегося юзера]
+ * @param [$subscribedUserId] [int] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
+ * @return {mixed} id добавленной записи или false
+ */
+function subscribeUser(int $subscriberId, int $subscribedUserId) : int {
+    $sql = "INSERT INTO subscribes (subscriber_id, subscribed_user_id) VALUES (?, ?)";
+    return insertDBDataFromArray($sql, [$subscriberId, $subscribedUserId]);
+}
+
+/**
  * Получает id типа поста по его имени
  * @param [$postTypeName] [string] [название типа поста]
  * @return {mixed} id типа поста или false
  */
 
-function getPostTypeIdByName(string $postTypeName) {
+function getPostTypeIdByName(string $postTypeName) : ?int {
     $sql = "SELECT id FROM post_types WHERE name = ?";
     return getDBDataFromArray($sql, [$postTypeName])['id'];
 }
@@ -168,7 +225,7 @@ function getPostTypeIdByName(string $postTypeName) {
  * @param [$tag] [string] [название хештега]
  * @return {mixed} id хештега или false
  */
-function getHashtagIdByName(string $tag) {
+function getHashtagIdByName(string $tag)  : ?int {
     $sql = "SELECT id FROM hashtags WHERE hashtag = ?";
     return getDBDataFromArray($sql, [$tag])['id'];
 }
@@ -178,20 +235,29 @@ function getHashtagIdByName(string $tag) {
  * @param [$postId] [int] [id поста]
  * @return {mixed} массив данных поста или false
  */
-function getPostData(int $postId) {
+function getPostData(int $postId) : ?array {
     $sql= "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
-
     return getDBDataFromArray($sql, [$postId]);
 }
 
 /**
+ * Получает комментарии к посту
+ * @param [$postId] [int] [id поста]
+ * @return {mixed} массив комментариев или false
+ */
+function getPostComments(int $postId) : ?array {
+    $sql = "SELECT comments.*, users.avatar, users.login FROM comments LEFT JOIN users ON users.id = comments.user_id WHERE comments.post_id = ?";
+    return getDBDataFromArray($sql, [$postId], 'all');
+}
+
+/**
  * Получает данные всех постов
- * @param [$postsTypeID] [int] [id типа поста для фильтрации]
+ * @param [$postsTypeID] [string] [id типа поста для фильтрации]
  * @return {mixed} массив данных постов или false
  */
-function getPosts(string $postsTypeId = '') {
-    if ($postsTypeId != '') {
-        $condition = 'WHERE posts.type_id = ?';
+function getPosts(string $postsTypeId = '') : ?array {
+    if (!empty($postsTypeId)) {
+        $condition = "WHERE posts.type_id = ?";
         $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
         return getDBDataFromArray($sql, [$postsTypeId], 'all');
     } else {
@@ -201,12 +267,46 @@ function getPosts(string $postsTypeId = '') {
 }
 
 /**
+ * Получает посты юзера
+ * @param [$userId ] [string] [id типа поста для фильтрации]
+ * @param [$postsTypeID] [string] [id типа поста для фильтрации]
+ * @return {mixed} массив данных постов или false
+ */
+function getUserPosts(string $userId = '', string $postsTypeId = '') : ?array {
+    if (!empty($postsTypeId)) { 
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.user_id = ? AND posts.type_id = ? ORDER BY posts.views_count DESC";
+        return getDBDataFromArray($sql, [$userId, $postsTypeId], 'all');
+    } else {
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.user_id = ? ORDER BY posts.views_count DESC";
+        return getDBDataFromArray($sql, [$userId], 'all');
+    }
+   
+}
+
+/**
+ * Получает посты для пагинаций
+ * @param [$postsTypeID] [int] [id типа поста для фильтрации]
+ * @param [$needFilter] [bool] [определяет нужен ли фильтр постов по типу]
+ * @return {mixed} массив данных постов или false
+ */
+function getPaginationPosts(array $data, bool $needFilter = false) : ?array {
+    if (!$needFilter) {
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC LIMIT ? OFFSET ?"; 
+        return getDBDataFromArray($sql, $data, 'all');     
+    } else {
+        $condition = 'WHERE posts.type_id = ?';
+        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC LIMIT ? OFFSET ?";
+        return getDBDataFromArray($sql, $data, 'all');
+    } 
+}
+
+/**
  * Получает данные постов согласно критерию поиска
  * @param [$searchQuery] [string] [Поисковая фраза]
  * @return {mixed} массив данных постов или false
  */
-function getSearchPosts(string $searchQuery) {
-    $sql = "SELECT posts.*, post_types.name as type_name, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
+function getSearchPosts(string $searchQuery) : ?array {
+    $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 
@@ -217,13 +317,54 @@ function getSearchPosts(string $searchQuery) {
  * @param [$table] [string] [название таблицы]
  * @return {string} количество записей с [$dataCount]
  */
-
 function getDBDataCount(string $dataCount, string $dataCol, string $table) : string {
 
     $sql = "SELECT COUNT(*) as count FROM $table WHERE $dataCol = $dataCount";
     $result = getDBDataFromArray($sql, null, 'all');
-    
+
     return $result[0]['count'];
+}
+
+ /**
+ * Получает массив id подписок
+ * @param [$subscribedUserId] [int] [id юзера, подписчиков, которого нужно получить]
+ * @return {miixed} массив id подписанных юзеров или false
+ */
+function getSubscribers(int $subscriber_id) : ?array {
+    $sql = "SELECT subscribed_user_id FROM subscribes WHERE subscriber_id = ?";
+    return getDBDataFromArray($sql, [$subscriber_id], 'all'); 
+}
+
+ /**
+ * Получает массив постов пользователя, которым ставили лайк
+ * @param [$userId] [int] [id юзера, лаки постов, которого нужно получить]
+ * @return {miixed} массив id подписанных юзеров или false
+ */
+function getLikedUserPosts(int $userId) : ?array {
+    $sql = "SELECT posts.*, likes.user_id as like_from_user, likes.like_date, users.login, users.avatar FROM posts LEFT JOIN likes ON likes.post_id = posts.id LEFT JOIN users ON likes.user_id = users.id WHERE posts.user_id = ? AND posts.id = likes.post_id;";
+    return getDBDataFromArray($sql, [$userId], 'all'); 
+}
+
+/**
+ * Получает id пользователя по логину
+ * @param [$subscribeUserId] [int] [id юзера, на которого подписка]
+ * @param [$userId] [int] [id подписчика]
+ * @return {mixed} id записи или false
+ */
+function checkSubscription(int $subscribeUserId, int $userId ) : ?array {
+    $sql = "SELECT id FROM subscribes WHERE subscriber_id = ? AND subscribed_user_id = ?";
+    return getDBDataFromArray($sql, [$userId, $subscribeUserId], 'single');
+}
+
+/**
+ * Удаляет запись о подписке
+ * @param [$subscribedUserId] [int] [id юзера, на которого подписка]
+ * @param [$userId] [int] [id подписчика]
+ * @return {mixed} id записи или false
+ */
+function deleteSubscription(int $subscribedUserId, int $userId) : bool {
+    $sql =  "DELETE FROM subscribes WHERE subscriber_id = ? AND subscribed_user_id = ?";
+    return deleteDBDataFromArray($sql, [$userId, $subscribedUserId]);
 }
 
 /**
@@ -231,11 +372,23 @@ function getDBDataCount(string $dataCount, string $dataCol, string $table) : str
  * @return {mixed} массив типов постов или false
  */
 
-function getPostTypes() {
+function getPostTypes() : ?array {
     $sql = "SELECT * FROM post_types";
     $postTypes = getDBDataFromArray($sql, null, 'all');
     
     return $postTypes;
+}
+
+/**
+ * Получает списокхештегов поста
+ * @param [$postId] [int] [id поста]
+ * @return {mixed} массив тегов или false
+ */
+function getHashtags(int $postId) : ?array {
+    $sql = "SELECT hashtag FROM hashtags LEFT JOIN hashtags_posts ON hashtags.id = hashtags_posts.hashtag_id WHERE hashtags_posts.post_id = '$postId'";
+    $hashtags = getDBDataFromArray($sql, null, 'all');
+    
+    return $hashtags;
 }
 
 /**
@@ -265,11 +418,21 @@ function getQueryParam(string $paramName) : string {
 
 /**
  * Получает id пользователя по логину
- * @param [$login] [sring] [массив данных о файле из $_FILES]
+ * @param [$login] [sring] [логин пользователя]
  * @return {array} массив данных пользователя
  */
-function getUserDataByLogin(string $login) : array {
+function getUserDataByLogin(string $login) : ?array {
     $sql = "SELECT * FROM users WHERE login = '$login'";
+    return getDBDataFromArray($sql, null, 'single');
+}
+
+/**
+ * Получает id пользователя по логину
+ * @param [$login] [sring] [id пользователя]
+ * @return {array} массив данных пользователя
+ */
+function getUserDataById(int $id) : ?array {
+    $sql = "SELECT * FROM users WHERE id = '$id'";
     return getDBDataFromArray($sql, null, 'single');
 }
 
@@ -457,12 +620,12 @@ function checkUserPassword(string $login) : bool {
  * @param [$login] [string] [логин]
  * @return {mixed} Результат проверки или false
  */
-function validateLogin(string $login) {
-    $loginValid = checkLoginLength($login);
+function validateLogin(string $login) : array {
+    $loginValid = checkLength($login, 20);
     if ($loginValid) {
         return checkDBUserData('login', $login);
     }  else {
-        return false;
+        return ['result' => false];
     }   
 }
 
@@ -471,9 +634,9 @@ function validateLogin(string $login) {
  * @param [$login] [string] [логин]
  * @return {bool} результат проверки
  */
-function checkLoginLength(string $login) : bool {
+function checkLength(string $text, int $length) : bool {
  
-    if (strlen($login) > 20) {
+    if (strlen($text) > $length) {
         return false;
     } else {
         return true;
@@ -602,4 +765,36 @@ function getRelativeDateDifference (DateTime $date, string $words) : string {
         default:
             return $relativeDate = $date->format('d.m.Y H:i');
     }
+}
+
+function validateAddCommentForm(array $postRequest, array $requiredFields, int $commentLength) : array {
+
+    $validateResult = [];
+    foreach ($postRequest as $fieldName => $fieldValue) {
+        //валидация на заполненность
+        if (in_array($fieldName, $requiredFields)) {
+
+            if (validateEmptyFilled($fieldName)) {
+                $validateResult['comment-form'][$fieldName] = 'success';
+            } else {
+                $validateResult['comment-form'][$fieldName] = 'Это поле должно быть заполнено';
+            }
+
+            if (!checkLength($fieldValue, $commentLength)) {
+                $validateResult['comment-form'][$fieldName] = 'success';
+            }  else {
+                $validateResult['comment-form'][$fieldName] = 'Длина комментария должна быть больше четырех символов';
+            }        
+        }
+    }
+    
+    if (isset($postRequest['post-id']) &&  $validateResult['comment-form']['comment-text'] == 'success') {
+        if (getPostData((int)filter_var($postRequest['post-id'], FILTER_SANITIZE_NUMBER_INT))) {
+            $validateResult['comment-form']['comment-text'] = 'success';
+        } else {
+            $validateResult['comment-form']['comment-text'] = 'Не существует поста с id: ' . $postRequest['post-id'];
+        }
+    }
+
+    return $validateResult;
 }
