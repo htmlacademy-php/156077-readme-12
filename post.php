@@ -8,6 +8,7 @@
     require_once 'helpers.php';
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
+    define('COMMENT_MIN_LENGTH', 4);
     $title = 'readme: пост ' . $postData['header'];
     $authorRegisterDate = new DateTime($postData['register_date']);
     $userName = $_SESSION['user'];
@@ -26,34 +27,8 @@
     $comments = getPostComments($postData['id']);
 
     $requiredFields = ['comment-text'];
-    $formFieldsError = [];
-
-    foreach ($_POST as $fieldName => $fieldValue) {
-        //валидация на заполненность
-        if (in_array($fieldName, $requiredFields)) {
-            if (validateEmptyFilled($fieldName)) {
-                $formFieldsError['comment-form'][$fieldName] = 'success';
-            } else {
-                $formFieldsError['comment-form'][$fieldName] = 'Это поле должно быть заполнено';
-            }
-           
-            if ($formFieldsError['comment-form'][$fieldName] == 'success') {
-
-                if (!checkLength($fieldValue, 4)) {
-                    $formFieldsError['comment-form'][$fieldName] = 'success';
-                } else {
-                    $formFieldsError['comment-form'][$fieldName] = 'Длина комментария должна быть больше четырех символов';
-                }         
-            }         
-        }
-        
-        if ($fieldName == 'post-id' && getPost($fieldValue)) {
-            $formFieldsError['comment-form'][$fieldName] = 'success';
-        } else {
-            $formFieldsError['comment-form'][$fieldName] = 'Это поле должно быть заполнено';
-        }
-    }
-    
+    // Обработка отправки комментария
+    $formFieldsError = validateAddCommentForm($_POST, $requiredFields, COMMENT_MIN_LENGTH);
     $validateErrors = getFormValidateErrors($formFieldsError);
 
     if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {
@@ -72,7 +47,6 @@
         header("Location: /profile.php?user=$postAuthor");
     }
 
-    
     $content = include_template( 'detail-post.php', [
         'postData' => $postData, 
         'userName' => $userName,

@@ -8,7 +8,7 @@ if (!isset($_SESSION['user'])) {
 require_once 'helpers.php';
 require_once 'functions.php';
 date_default_timezone_set('Europe/Moscow');
-
+define('COMMENT_MIN_LENGTH', 4);
 $userProfileName = getQueryParam('user');
 $userName = $_SESSION['user'];
 $userId = getUserDataByLogin($userName)['id'];
@@ -49,34 +49,8 @@ if (!empty($subscribedUserId) && checkSubscription($subscribedUserId, $userId)) 
 }
 
 $requiredFields = ['comment-text'];
-$formFieldsError = [];
-
-foreach ($_POST as $fieldName => $fieldValue) {
-    //валидация на заполненность
-    if (in_array($fieldName, $requiredFields)) {
-        if (validateEmptyFilled($fieldName)) {
-            $formFieldsError['comment-form'][$fieldName] = 'success';
-        } else {
-            $formFieldsError['comment-form'][$fieldName] = 'Это поле должно быть заполнено';
-        }
-        
-        if ($formFieldsError['comment-form'][$fieldName] == 'success') {
-
-            if (!checkLength($fieldValue, 4)) {
-                $formFieldsError['comment-form'][$fieldName] = 'success';
-            } else {
-                $formFieldsError['comment-form'][$fieldName] = 'Длина комментария должна быть больше четырех символов';
-            }         
-        } 
-
-        if ($fieldName == 'post-id' && getPost($fieldValue)) {
-            $formFieldsError['comment-form'][$fieldName] = 'success';
-        } else {
-            $formFieldsError['comment-form'][$fieldName] = 'Пост не доступен';
-        }
-    } 
-}
-
+// Обработка отправки комментария
+$formFieldsError = validateAddCommentForm($_POST, $requiredFields, COMMENT_MIN_LENGTH);
 $validateErrors = getFormValidateErrors($formFieldsError);
 
 if (count(array_unique($validateErrors)) === 1 && array_unique($validateErrors)[0] === 'success') {

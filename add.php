@@ -9,6 +9,9 @@
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
 
+    $title = 'readme: добавление нового поста';
+    $userName = $_SESSION['user'];
+
     $postTypes = getPostTypes();
     
     $requiredFields = ['form-heading', 'post-text', 'quote-text', 'quote-author', 'form-link', 'video-link'];
@@ -160,5 +163,5 @@
         'formFieldsError' => $formFieldsError,
         'fieldsHeader' => $fieldsHeader
     ]);     
-    $layout = include_template( 'layout.php', ['content' => $content]);
+    $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName]);
     print($layout); 

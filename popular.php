@@ -7,7 +7,7 @@
     require_once 'helpers.php';
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
-   
+    define('POSTS_TO_SHOW', 3);
     $postTypes = getPostTypes();
     $filterPostTypeId = getQueryParam('post_type_id');
 
@@ -18,30 +18,30 @@
     }
 
     $postsCount = count($postsData);
-    $postsToShow = 3;
-    $postPagesCount = ceil($postsCount / $postsToShow);
+
+    $postPagesCount = ceil($postsCount / POSTS_TO_SHOW);
     $currentPage = (getQueryParam('pagen')) ? (int)getQueryParam('pagen') : 1;
     $nextPage = ($postPagesCount != $currentPage) ? $currentPage + 1 : -1;
     $previousPage = $currentPage - 1;
-    $offset = ($currentPage - 1) * $postsToShow;
+    $offset = ($currentPage - 1) * POSTS_TO_SHOW;
 
     if (!empty($filterPostTypeId)) {
         $paginationData = [
             $filterPostTypeId,
-            $postsToShow,
+            POSTS_TO_SHOW,
             $offset
         ];
     } else {
         $paginationData = [
-            $postsToShow,
+            POSTS_TO_SHOW,
             $offset
         ];
     }
 
     // Определяем нужна ли пагинация и фильтрация по типу поста
-    if ($postsCount > $postsToShow && !empty($filterPostTypeId)) {     
+    if ($postsCount > POSTS_TO_SHOW && !empty($filterPostTypeId)) {     
         $postsData = getPaginationPosts($paginationData, true);
-    } elseif ($postsCount > $postsToShow && empty($filterPostTypeId)){
+    } elseif ($postsCount > POSTS_TO_SHOW && empty($filterPostTypeId)){
         $postsData = getPaginationPosts($paginationData);
     }
     // Передаем данные для формирования ссылок на следующую и предыдущую страницу

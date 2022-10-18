@@ -28,7 +28,7 @@
             }     
         }
 
-        if ($fieldName == 'password' && $formFieldsError['authentification'][$fieldName] == 'success') {          
+        if ($fieldName == 'password' && $formFieldsError['authentification']['login'] == 'success') {          
             if (!verifyUserAuthPassword($_POST['login'], $_POST['password'])) {
                 $formFieldsError['authentification'][$fieldName] = 'Пароли не совпадают';
             } else {
