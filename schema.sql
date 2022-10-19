@@ -34,6 +34,7 @@ CREATE TABLE posts (
   views_count INT DEFAULT 0,
   is_repost BOOL,
   origin_user_id INT,
+  origin_post_id INT,
   repost_count INT DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (type_id) REFERENCES post_types (id) ON DELETE SET NULL

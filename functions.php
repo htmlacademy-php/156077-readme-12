@@ -337,6 +337,11 @@ function getSearchPosts(string $searchQuery) : ?array {
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 
+function getPostsByTag(string $searchQuery) : ?array {
+    $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id LEFT JOIN hashtags_posts ON posts.id = hashtags_posts.post_id LEFT JOIN hashtags ON hashtags.id = hashtags_posts.hashtag_id WHERE hashtags.hashtag = ?";
+    return getDBDataFromArray($sql, [$searchQuery], 'all'); 
+}
+
 /**
  * Подсчитывает количество записей в переданной таблице по переданному столбцу
  * @param [$dataCount] [all] [значение столбца таблицы для подсчета]
@@ -846,7 +851,7 @@ function increaseReposts(int $postId, int $currentRepostCount) : bool {
 
 function repostUserPost(int $postId, int $userId) : bool {
     $sanitizedId = (int)filter_var($postId, FILTER_SANITIZE_NUMBER_INT);
-    $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, origin_user_id) SELECT user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, user_id FROM posts WHERE id = ?";
+    $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, origin_user_id, origin_post_id) SELECT user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, user_id, id FROM posts WHERE id = ?";
     $newPostId = insertDBDataFromArray($sql, [$postId]);
 
     if ($newPostId) {

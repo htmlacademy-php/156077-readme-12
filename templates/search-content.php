@@ -4,7 +4,12 @@
         <h2 class="visually-hidden">Результаты поиска</h2>
         <div class="search__query-wrapper">
           <div class="search__query container">
-            <span>Вы искали:</span>
+            <?php if ($searchTagMode) : ?>
+              <span>Вы искали тег:</span>
+            <?php else : ?>
+              <span>Вы искали:</span>
+            <?php endif; ?>
+           
             <span class="search__query-text">#<?= $searchQuery; ?></span>
           </div>
         </div>
