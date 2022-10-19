@@ -282,13 +282,20 @@ function getPostComments(int $postId) : ?array {
  * @param [$postsTypeID] [string] [id типа поста для фильтрации]
  * @return {mixed} массив данных постов или false
  */
-function getPosts(string $postsTypeId = '') : ?array {
+function getPosts(string $postsTypeId = '', string $sortType) : ?array {
+    $sortTypeCondition = "ORDER BY posts.views_count DESC";
+    if ($sortType === 'date') {
+        $sortTypeCondition = "ORDER BY post_create_date DESC";
+    }
+    if ($sortType === 'likes') {
+        $sortTypeCondition = "ORDER BY likes_count DESC";
+    }
     if (!empty($postsTypeId)) {
         $condition = "WHERE posts.type_id = ?";
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition $sortTypeCondition";
         return getDBDataFromArray($sql, [$postsTypeId], 'all');
     } else {
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $sortTypeCondition";
         return getDBDataFromArray($sql, null, 'all');
     }
 }
@@ -316,13 +323,22 @@ function getUserPosts(string $userId = '', string $postsTypeId = '') : ?array {
  * @param [$needFilter] [bool] [определяет нужен ли фильтр постов по типу]
  * @return {mixed} массив данных постов или false
  */
-function getPaginationPosts(array $data, bool $needFilter = false) : ?array {
+function getPaginationPosts(array $data, string $sortType, bool $needFilter = false) : ?array {
+    $sortTypeCondition = "ORDER BY posts.views_count DESC";
+    if ($sortType === 'date') {
+        $sortTypeCondition = "ORDER BY post_create_date DESC";
+    }
+
+    if ($sortType === 'likes') {
+        $sortTypeCondition = "ORDER BY likes_count DESC";
+    }
+
     if (!$needFilter) {
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC LIMIT ? OFFSET ?"; 
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.is_repost != 1 $sortTypeCondition LIMIT ? OFFSET ?"; 
         return getDBDataFromArray($sql, $data, 'all');     
     } else {
-        $condition = 'WHERE posts.type_id = ?';
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC LIMIT ? OFFSET ?";
+        $condition = 'WHERE posts.type_id = ? AND posts.is_repost != 1';
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition $sortTypeCondition LIMIT ? OFFSET ?";
         return getDBDataFromArray($sql, $data, 'all');
     } 
 }
@@ -338,7 +354,7 @@ function getSearchPosts(string $searchQuery) : ?array {
 }
 
 function getPostsByTag(string $searchQuery) : ?array {
-    $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id LEFT JOIN hashtags_posts ON posts.id = hashtags_posts.post_id LEFT JOIN hashtags ON hashtags.id = hashtags_posts.hashtag_id WHERE hashtags.hashtag = ?";
+    $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts JOIN hashtags_posts JOIN hashtags LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = hashtags_posts.post_id AND hashtags.id = hashtags_posts.hashtag_id AND hashtags.hashtag = ?";
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 

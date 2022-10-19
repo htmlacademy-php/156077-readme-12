@@ -32,7 +32,7 @@ CREATE TABLE posts (
   post_video TEXT DEFAULT NULL,
   post_link TEXT DEFAULT NULL,
   views_count INT DEFAULT 0,
-  is_repost BOOL,
+  is_repost TINYINT DEFAULT 0,
   origin_user_id INT,
   origin_post_id INT,
   repost_count INT DEFAULT 0,

@@ -95,7 +95,7 @@
             <?php if (!empty(getHashtags($postData['id']))) : ?>
                 <ul class="post__tags">
                     <?php foreach (getHashtags($postData['id']) as $tagIndex => $tag) : ?>      
-                        <li><a href="#">#<?= $tag['hashtag']; ?></a></li>
+                        <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= $tag['hashtag']; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
