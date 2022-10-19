@@ -110,16 +110,43 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
 }
 
 /**
+ * Обновляет данные в таблицах
+ * @param [$sql] [sql_query] [простой массив переменных]
+ * @param [$data] [array] [простой массив переменных]
+ * @return {mixed} результат stmp или false
+ */
+function updateDBDataFromArray(string $sql, array $data) : bool {
+    $mysqli = dbConnection();
+    
+    if (!$data) {
+        return false;
+    } else {     
+        $varTypes = getVarTypes($data);      
+        $stmt = $mysqli->prepare($sql);
+        
+        if ($stmt) {
+            $stmt->bind_param($varTypes, ...$data);
+            $stmt->execute();
+            $result = $stmt->get_result();    
+        }   
+
+        return true;  
+    } 
+}
+
+/**
  * Делает запись в БД из массива переменных
  * @param [$data] [простой массив переменных]
  * @param [$sql] [sql string] [sql запрос]
  * @return {int} id добавленной записи
  */
 
-function insertDBDataFromArray(string $sql, array $data) : int {
+function insertDBDataFromArray(string $sql, array $data) : ?int {
 
-    if (!$data || !is_array($data)) {
-        return false;
+    if (!$data) {
+        $result = $mysqli->query($sql);
+    } elseif (!is_array($data)) {
+        return null;
     } else {
         $varTypes = getVarTypes($data);
         $mysqli = dbConnection();
@@ -797,4 +824,35 @@ function validateAddCommentForm(array $postRequest, array $requiredFields, int $
     }
 
     return $validateResult;
+}
+
+function increasePostView(int $postId, int $currentViewCount) : bool {
+    
+    $newCount = $currentViewCount + 1;
+    $sql = "UPDATE posts SET views_count = '$newCount' WHERE id = ?";
+    if (getPostData($postId)) {
+        return updateDBDataFromArray($sql, [$postId]);
+    }
+}
+
+function increaseReposts(int $postId, int $currentRepostCount) : bool {
+
+    $newCount = $currentRepostCount + 1; 
+    $sql = "UPDATE posts SET repost_count = '$newCount' WHERE id = ?";
+    
+    return updateDBDataFromArray($sql, [$postId]);
+    
+}
+
+function repostUserPost(int $postId, int $userId) : bool {
+    $sanitizedId = (int)filter_var($postId, FILTER_SANITIZE_NUMBER_INT);
+    $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, origin_user_id) SELECT user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, user_id FROM posts WHERE id = ?";
+    $newPostId = insertDBDataFromArray($sql, [$postId]);
+
+    if ($newPostId) {
+        $sql = "UPDATE posts SET is_repost = true, user_id = ? WHERE id = ?";
+        return updateDBDataFromArray($sql, [$userId, $newPostId]);
+    } else {
+        return false;
+    }   
 }

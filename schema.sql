@@ -31,7 +31,10 @@ CREATE TABLE posts (
   post_image TEXT DEFAULT NULL,
   post_video TEXT DEFAULT NULL,
   post_link TEXT DEFAULT NULL,
-  views_count INT DEFAULT NULL,
+  views_count INT DEFAULT 0,
+  is_repost BOOL,
+  origin_user_id INT,
+  repost_count INT DEFAULT 0,
   FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
   FOREIGN KEY (type_id) REFERENCES post_types (id) ON DELETE SET NULL
 );

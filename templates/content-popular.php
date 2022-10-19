@@ -105,6 +105,7 @@
         <div class="popular__posts">
             <?php if ($postsData && is_array($postsData)) : ?>
                 <?php foreach ($postsData as $postIndex => $post) : ?>
+                    <?php if ($post['is_repost']) continue; ?>
                     <article class="popular__post post <?= $post['type_name']; ?>">
                         <header class="post__header">
                             <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>

@@ -12,6 +12,7 @@
           <div class="container">
             <div class="search__content">
                 <?php foreach ($postsData as $postIndex => $post) : ?>
+                    <?php if ($post['is_repost']) continue; ?>
                     <?php print(include_template( 'parts/post-preview.php', ['post' => $post, 'postTemplateName' => 'search']));?>
                 <?php endforeach; ?>
             </div>
