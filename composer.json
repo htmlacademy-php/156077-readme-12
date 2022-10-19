@@ -1,0 +1,17 @@
+{
+    "name": "79537/156077-readme-12",
+    "autoload": {
+        "psr-4": {
+            "79537\\156077Readme12\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Viktor Korovin",
+            "email": "rush89@list.ru"
+        }
+    ],
+    "require": {
+        "symfony/mailer": "^4.4"
+    }
+}

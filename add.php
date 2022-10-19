@@ -127,6 +127,16 @@
         $postInsertDBresult = insertNewPost($data);
         if (!$postInsertDBresult) {
             $formFieldsError[$_POST['active-content-type']] = ['db-error' => 'Произошла ошибка при добавлении нового поста'];
+        } else {
+            $userData = getUserDataByLogin($userName);
+            $subscribers = getSubscribers($userData['id']);
+            foreach ($subscribers as $subscriberId => $subscriber) {
+                $subscriberData = getUserDataById($subscriber['subscribed_user_id']);
+                $to = $userData['email'];
+                $subject = 'Новая публикация от пользователя ' . $userName;
+                $text = 'Здравствуйте,' . $subscriber['login'] . '. Пользователь ' . $userData['login'] . 'только что опубликовал новую запись' . $postHeader . '. Посмотрите её на странице пользователя: http://156077-readme-12/profile.php?user=' . $userData['login'];
+                sendEmail($to, $subject, $text);
+            }         
         }
         // если пост добавлен в базу, добавляем хештеги при наличии
         if ($postInsertDBresult) {

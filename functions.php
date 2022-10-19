@@ -1,6 +1,11 @@
 <?php
 declare(strict_types = 1);
 
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mime\Email;
+require 'vendor/autoload.php';
+
 /**
  * Подключает к базе данных
  * @return {object} соединение с БД, либо выходит из скрипта
@@ -876,4 +881,21 @@ function repostUserPost(int $postId, int $userId) : bool {
     } else {
         return false;
     }   
+}
+
+function sendEmail(string $to, string $subject, string $text) : bool {
+    // Конфигурация траспорта
+    $dsn = 'smtp://rush89@list.ru:Pe23htFpg9ugYgSymqsK@smtp.mail.ru:465';
+    $transport = Transport::fromDsn($dsn);
+    
+    $message = new Email();
+    $message->to($to);
+    $message->Sender('rush89@list.ru');
+    $message->subject($subject);
+    $message->text($text);
+    // Отправка сообщения
+    $mailer = new Mailer($transport);
+    $mailer->send($message);
+
+    return true;
 }
