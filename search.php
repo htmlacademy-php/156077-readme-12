@@ -10,15 +10,26 @@ date_default_timezone_set('Europe/Moscow');
 
 $postTypes = getPostTypes();
 $searchQuery = filter_var($_GET['search-phrase'], FILTER_SANITIZE_STRING);
-$previousPage = parse_url($_SERVER['HTTP_REFERER'])['path'];
+if (substr($searchQuery, 0, 3) == 'tag') {
+    $searchQuery = substr($searchQuery, 4);
+    $searchTagMode = true;
+} else {
+    $searchQuery = filter_var($_GET['search-phrase'], FILTER_SANITIZE_STRING);
+}
 
-$postsData = getSearchPosts($searchQuery);
+if ($searchTagMode) {
+    $postsData = getPostsByTag($searchQuery);
+} else {
+    $postsData = getSearchPosts($searchQuery);
+}
+
+$previousPage = parse_url($_SERVER['HTTP_REFERER'])['path'];
 
 $title = 'readme: поиск по блогу';
 $userName = $_SESSION['user'];
 
 if ($postsData) {
-    $content = include_template( 'search-content.php', ['postsData' => $postsData, 'postTypes' => $postTypes, 'searchQuery' => $searchQuery] );    
+    $content = include_template( 'search-content.php', ['postsData' => $postsData, 'postTypes' => $postTypes, 'searchQuery' => $searchQuery, 'searchTagMode' => $searchTagMode] );    
 } else {
     $content = include_template( 'search-no-results.php', ['searchQuery' => $searchQuery, 'previousPage' => $previousPage] );    
 }

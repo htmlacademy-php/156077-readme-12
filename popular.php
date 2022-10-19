@@ -7,16 +7,12 @@
     require_once 'helpers.php';
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
-    define('POSTS_TO_SHOW', 3);
+    define('POSTS_TO_SHOW', 6);
     $postTypes = getPostTypes();
     $filterPostTypeId = getQueryParam('post_type_id');
-
-    if (!empty($filterPostTypeId) && gettype((int)$filterPostTypeId) != 'string') {
-        $postsData = getPosts($filterPostTypeId);
-    } else {
-        $postsData = getPosts();
-    }
-
+    $sortType = getQueryParam('sort');
+    
+    $postsData = getPosts($filterPostTypeId, $sortType);
     $postsCount = count($postsData);
 
     $postPagesCount = ceil($postsCount / POSTS_TO_SHOW);
@@ -40,9 +36,9 @@
 
     // Определяем нужна ли пагинация и фильтрация по типу поста
     if ($postsCount > POSTS_TO_SHOW && !empty($filterPostTypeId)) {     
-        $postsData = getPaginationPosts($paginationData, true);
+        $postsData = getPaginationPosts($paginationData, $sortType, true);
     } elseif ($postsCount > POSTS_TO_SHOW && empty($filterPostTypeId)){
-        $postsData = getPaginationPosts($paginationData);
+        $postsData = getPaginationPosts($paginationData, $sortType);
     }
     // Передаем данные для формирования ссылок на следующую и предыдущую страницу
     $pagesData = [
@@ -53,7 +49,13 @@
     $title = 'readme: блог, каким он должен быть';
     $userName = $_SESSION['user'];
     
-    $content = include_template( 'content-popular.php', ['postsData' => $postsData, 'postTypes' => $postTypes, 'filterPostTypeId' => $filterPostTypeId, 'pagesData' => $pagesData] );     
+    $content = include_template( 'content-popular.php', [
+        'postsData' => $postsData, 
+        'postTypes' => $postTypes, 
+        'filterPostTypeId' => $filterPostTypeId, 
+        'pagesData' => $pagesData,
+        'sortType' => $sortType
+        ] );     
     $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName]);
     print($layout); 
     

@@ -23,13 +23,16 @@
           </p>
         </div>
           <div class="profile__user-buttons user__buttons">
-          <?php if (!empty(getQueryParam('user'))) : ?>
-              <a href="/profile.php?subscribe_user=<?= $userData['id'];?><?= (!empty(getQueryParam('user'))) ? '&user=' . getQueryParam('user') : ''; ?>" class="profile__user-button user__button user__button--subscription button button--main">Подписаться</a>
-                <?php if ($subscribeNotice) : ?>
-                    <p><?= $subscribeNotice; ?></p>
-                <?php endif; ?>
-              <a class="profile__user-button user__button user__button--writing button button--green" href="#">Сообщение</a>
-            <?php endif; ?>
+          <?php if (!empty(getQueryParam('user')) && !checkSubscription($userData['id'], $userId)) : ?>
+            <a href="/profile.php?subscribe_user=<?= $userData['id'];?><?= (!empty(getQueryParam('user'))) ? '&user=' . getQueryParam('user') : ''; ?>" class="profile__user-button user__button user__button--subscription button button--main">Подписаться</a>
+              <?php if ($subscribeNotice) : ?>
+                  <p><?= $subscribeNotice; ?></p>
+              <?php endif; ?>
+            
+          <?php endif; ?>
+          <?php if (!empty(getQueryParam('user')) && checkSubscription($userId, $userData['id'])) : ?>
+            <a class="profile__user-button user__button user__button--writing button button--green" href="#">Сообщение</a>
+          <?php endif; ?>
           </div>
       </div>
     </div>
@@ -55,7 +58,20 @@
             <?php foreach ($postsData as $postIndex => $post) : ?>
                 <article class="profile__post post <?= $post['type_name']?>">
                     <header class="post__header">
-                    <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
+                      <?php if ($post['is_repost']) : ?>
+                        <div class="post__author">
+                          <a class="post__author-link" href="/profile?user=<?= getUserDataById($post['origin_user_id'])['login']; ?>" title="Автор">
+                            <div class="post__avatar-wrapper post__avatar-wrapper--repost">
+                              <img class="post__author-avatar" src="<?= checkFilePath(getUserDataById($post['origin_user_id'])['avatar']); ?>" alt="Аватар пользователя">
+                            </div>
+                            <div class="post__info">
+                              <b class="post__author-name">Репост: <?= getUserDataById($post['origin_user_id'])['login']; ?></b>
+                              <time class="post__time" datetime="2019-03-30T14:31"><?= getRelativeDateDifference(new DateTime($post['create_date']), 'назад'); ?></time>
+                            </div>
+                          </a>
+                        </div>
+                      <?php endif; ?>
+                      <h2><a href="/post.php?post_id=<?= ($post['is_repost']) ? $post['origin_post_id'] : $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
                     </header>
                     <div class="post__main">
                         <?php if ($post['type_name'] == 'post-photo') : ?>
@@ -115,11 +131,11 @@
                                   <span><?= getDBDataCount($post['id'], 'post_id', 'likes'); ?></span>
                                   <span class="visually-hidden">количество лайков</span>
                                 </a>
-                                <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
+                                <a class="post__indicator post__indicator--repost button" href="/repost.php?post_id=<?= $post['id']; ?>" title="Репост">
                                   <svg class="post__indicator-icon" width="19" height="17">
                                       <use xlink:href="#icon-repost"></use>
                                   </svg>
-                                  <span>5</span>
+                                  <span><?= $post['repost_count'];?></span>
                                   <span class="visually-hidden">количество репостов</span>
                                 </a>
                             </div>
@@ -128,7 +144,7 @@
                         <?php if (!empty(getHashtags($post['id']))) : ?>
                             <ul class="post__tags">
                                 <?php foreach (getHashtags($post['id']) as $tagIndex => $tag) : ?>      
-                                    <li><a href="#">#<?= $tag['hashtag']; ?></a></li>
+                                    <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= $tag['hashtag']; ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         <?php endif; ?>

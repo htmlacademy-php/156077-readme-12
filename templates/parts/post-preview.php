@@ -1,21 +1,35 @@
 <article class="<?= $postTemplateName;?>__post post <?= $post['type_name'];?>">
     <header class="post__header post__author">
-        <a class="post__author-link" href="#" title="Автор">
-        <div class="post__avatar-wrapper"> 
-            <img class="post__author-avatar" src="<?= checkFilePath($post['avatar']); ?>" alt="Аватар пользователя" width="60" height="60"> 
-        </div>
-        <div class="post__info"> 
-            <b class="post__author-name"><?= $post['login']; ?></b> <span class="post__time">
-            <?= getRelativeDateDifference(new DateTime($post['create_date']), 'назад'); ?></span> 
-        </div>
-        </a>
+        <?php if ($post['is_repost']) : ?>
+            <div class="post__author">
+                <a class="post__author-link" href="/profile?user=<?= getUserDataById($post['origin_user_id'])['login']; ?>" title="Автор">
+                <div class="post__avatar-wrapper post__avatar-wrapper--repost">
+                    <img class="post__author-avatar" src="<?= checkFilePath(getUserDataById($post['origin_user_id'])['avatar']); ?>" alt="Аватар пользователя">
+                </div>
+                <div class="post__info">
+                    <b class="post__author-name">Репост: <?= getUserDataById($post['origin_user_id'])['login']; ?></b>
+                    <time class="post__time" datetime="<?= $post['create_date'];?>"><?= getRelativeDateDifference(new DateTime($post['create_date']), 'назад'); ?></time>
+                </div>
+                </a>
+            </div>
+        <?php else : ?>
+            <a class="post__author-link" href="#" title="Автор">
+                <div class="post__avatar-wrapper"> 
+                    <img class="post__author-avatar" src="<?= checkFilePath($post['avatar']); ?>" alt="Аватар пользователя" width="60" height="60"> 
+                </div>
+                <div class="post__info"> 
+                    <b class="post__author-name"><?= $post['login']; ?></b> <span class="post__time">
+                    <?= getRelativeDateDifference(new DateTime($post['create_date']), 'назад'); ?></span> 
+                </div>
+            </a>
+        <?php endif; ?>
     </header>
     <div class="post__main">
         <?php if ($post['type_name'] == 'post-photo') : ?>
-            <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
+            <h2><a href="/post.php?post_id=<?= ($post['is_repost']) ? $post['origin_post_id'] : $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
             <div class="post-photo__image-wrapper"> <img src="<?= checkFilePath($post['post_image']); ?>" alt="Фото от пользователя" width="760" height="396"> </div>
         <?php elseif ($post['type_name'] == 'post-text') : ?>
-            <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
+            <h2><a href="/post.php?post_id=<?= ($post['is_repost']) ? $post['origin_post_id'] : $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
             <p>
                 <?= cropText($post['post_text'], 200); ?>
             </p>

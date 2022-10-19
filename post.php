@@ -17,6 +17,7 @@
 
     if (!empty($postId)) {
         $postData = getPostData($postId);
+        increasePostView($postId, $postData['views_count']);
     } else {
         http_response_code(404);
         $content = include_template( '404.php'); 

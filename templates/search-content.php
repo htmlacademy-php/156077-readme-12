@@ -4,7 +4,12 @@
         <h2 class="visually-hidden">Результаты поиска</h2>
         <div class="search__query-wrapper">
           <div class="search__query container">
-            <span>Вы искали:</span>
+            <?php if ($searchTagMode) : ?>
+              <span>Вы искали тег:</span>
+            <?php else : ?>
+              <span>Вы искали:</span>
+            <?php endif; ?>
+           
             <span class="search__query-text">#<?= $searchQuery; ?></span>
           </div>
         </div>
@@ -12,6 +17,7 @@
           <div class="container">
             <div class="search__content">
                 <?php foreach ($postsData as $postIndex => $post) : ?>
+                    <?php if ($post['is_repost']) continue; ?>
                     <?php print(include_template( 'parts/post-preview.php', ['post' => $post, 'postTemplateName' => 'search']));?>
                 <?php endforeach; ?>
             </div>

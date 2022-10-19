@@ -8,7 +8,7 @@
                 <b class="popular__sorting-caption sorting__caption">Сортировка:</b>
                 <ul class="popular__sorting-list sorting__list">
                     <li class="sorting__item sorting__item--popular">
-                        <a class="sorting__link sorting__link--active" href="#">
+                        <a class="sorting__link <?= (!$sortType || $sortType == 'popularity') ? 'sorting__link--active' : ''; ?>" href="/popular.php?sort=popularity<?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">
                             <span>Популярность</span>
                             <svg class="sorting__icon" width="10" height="12">
                                 <use xlink:href="#icon-sort"></use>
@@ -16,7 +16,7 @@
                         </a>
                     </li>
                     <li class="sorting__item">
-                        <a class="sorting__link" href="#">
+                        <a class="sorting__link <?= ($sortType == 'likes') ? 'sorting__link--active' : ''; ?>" href="/popular.php?sort=likes<?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">
                             <span>Лайки</span>
                             <svg class="sorting__icon" width="10" height="12">
                                 <use xlink:href="#icon-sort"></use>
@@ -24,7 +24,7 @@
                         </a>
                     </li>
                     <li class="sorting__item">
-                        <a class="sorting__link" href="#">
+                        <a class="sorting__link <?= ($sortType == 'date') ? 'sorting__link--active' : ''; ?>" href="/popular.php?sort=date<?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">
                             <span>Дата</span>
                             <svg class="sorting__icon" width="10" height="12">
                                 <use xlink:href="#icon-sort"></use>
@@ -105,6 +105,7 @@
         <div class="popular__posts">
             <?php if ($postsData && is_array($postsData)) : ?>
                 <?php foreach ($postsData as $postIndex => $post) : ?>
+                    <?php if ($post['is_repost']) continue; ?>
                     <article class="popular__post post <?= $post['type_name']; ?>">
                         <header class="post__header">
                             <h2><a href="/post.php?post_id=<?= $post['id']; ?>"><?= htmlspecialchars($post['header']); ?></a></h2>
@@ -191,10 +192,10 @@
                 <?php endforeach; ?>
                 <div class="popular__page-links">
                 <?php if ($pagesData['previous'] !== 0) : ?>
-                    <a class="popular__page-link popular__page-link--prev button button--gray" href="/popular.php?pagen=<?= $pagesData['previous'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">Предыдущая страница</a>
+                    <a class="popular__page-link popular__page-link--prev button button--gray" href="/popular.php?pagen=<?= $pagesData['previous'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?><?= (!empty($sortType)) ? '&sort=' . $sortType : ''; ?>">Предыдущая страница</a>
                 <?php endif; ?>
                 <?php if ($pagesData['next'] !== -1) : ?>
-                    <a class="popular__page-link popular__page-link--next button button--gray" href="/popular.php?pagen=<?= $pagesData['next'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?>">Следующая страница</a>
+                    <a class="popular__page-link popular__page-link--next button button--gray" href="/popular.php?pagen=<?= $pagesData['next'] ;?><?= (!empty($filterPostTypeId)) ? '&post_type_id=' . $filterPostTypeId : ''; ?><?= (!empty($sortType)) ? '&sort=' . $sortType : ''; ?>">Следующая страница</a>
                 <?php endif; ?>
             </div>
             <?php else : ?>

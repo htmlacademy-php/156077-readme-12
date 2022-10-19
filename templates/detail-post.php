@@ -80,11 +80,11 @@
                 <span><?= getDBDataCount($postData['id'], 'post_id', 'comments'); ?></span>
                 <span class="visually-hidden">количество комментариев</span>
               </a>
-              <a class="post__indicator post__indicator--repost button" href="#" title="Репост">
+              <a class="post__indicator post__indicator--repost button" href="/repost.php?post_id=<?= $postData['id'];?>" title="Репост">
                 <svg class="post__indicator-icon" width="19" height="17">
                   <use xlink:href="#icon-repost"></use>
                 </svg>
-                <span>5</span>
+                <span><?= $postData['repost_count']; ?></span>
                 <span class="visually-hidden">количество репостов</span>
               </a>
             </div>
@@ -95,7 +95,7 @@
             <?php if (!empty(getHashtags($postData['id']))) : ?>
                 <ul class="post__tags">
                     <?php foreach (getHashtags($postData['id']) as $tagIndex => $tag) : ?>      
-                        <li><a href="#">#<?= $tag['hashtag']; ?></a></li>
+                        <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= $tag['hashtag']; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>

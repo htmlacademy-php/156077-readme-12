@@ -110,16 +110,43 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
 }
 
 /**
+ * Обновляет данные в таблицах
+ * @param [$sql] [sql_query] [простой массив переменных]
+ * @param [$data] [array] [простой массив переменных]
+ * @return {mixed} результат stmp или false
+ */
+function updateDBDataFromArray(string $sql, array $data) : bool {
+    $mysqli = dbConnection();
+    
+    if (!$data) {
+        return false;
+    } else {     
+        $varTypes = getVarTypes($data);      
+        $stmt = $mysqli->prepare($sql);
+        
+        if ($stmt) {
+            $stmt->bind_param($varTypes, ...$data);
+            $stmt->execute();
+            $result = $stmt->get_result();    
+        }   
+
+        return true;  
+    } 
+}
+
+/**
  * Делает запись в БД из массива переменных
  * @param [$data] [простой массив переменных]
  * @param [$sql] [sql string] [sql запрос]
  * @return {int} id добавленной записи
  */
 
-function insertDBDataFromArray(string $sql, array $data) : int {
+function insertDBDataFromArray(string $sql, array $data) : ?int {
 
-    if (!$data || !is_array($data)) {
-        return false;
+    if (!$data) {
+        $result = $mysqli->query($sql);
+    } elseif (!is_array($data)) {
+        return null;
     } else {
         $varTypes = getVarTypes($data);
         $mysqli = dbConnection();
@@ -255,13 +282,20 @@ function getPostComments(int $postId) : ?array {
  * @param [$postsTypeID] [string] [id типа поста для фильтрации]
  * @return {mixed} массив данных постов или false
  */
-function getPosts(string $postsTypeId = '') : ?array {
+function getPosts(string $postsTypeId = '', string $sortType) : ?array {
+    $sortTypeCondition = "ORDER BY posts.views_count DESC";
+    if ($sortType === 'date') {
+        $sortTypeCondition = "ORDER BY post_create_date DESC";
+    }
+    if ($sortType === 'likes') {
+        $sortTypeCondition = "ORDER BY likes_count DESC";
+    }
     if (!empty($postsTypeId)) {
         $condition = "WHERE posts.type_id = ?";
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC";
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition $sortTypeCondition";
         return getDBDataFromArray($sql, [$postsTypeId], 'all');
     } else {
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC";
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $sortTypeCondition";
         return getDBDataFromArray($sql, null, 'all');
     }
 }
@@ -289,13 +323,22 @@ function getUserPosts(string $userId = '', string $postsTypeId = '') : ?array {
  * @param [$needFilter] [bool] [определяет нужен ли фильтр постов по типу]
  * @return {mixed} массив данных постов или false
  */
-function getPaginationPosts(array $data, bool $needFilter = false) : ?array {
+function getPaginationPosts(array $data, string $sortType, bool $needFilter = false) : ?array {
+    $sortTypeCondition = "ORDER BY posts.views_count DESC";
+    if ($sortType === 'date') {
+        $sortTypeCondition = "ORDER BY post_create_date DESC";
+    }
+
+    if ($sortType === 'likes') {
+        $sortTypeCondition = "ORDER BY likes_count DESC";
+    }
+
     if (!$needFilter) {
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id ORDER BY posts.views_count DESC LIMIT ? OFFSET ?"; 
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.is_repost != 1 $sortTypeCondition LIMIT ? OFFSET ?"; 
         return getDBDataFromArray($sql, $data, 'all');     
     } else {
-        $condition = 'WHERE posts.type_id = ?';
-        $sql = "SELECT posts.*, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition ORDER BY posts.views_count DESC LIMIT ? OFFSET ?";
+        $condition = 'WHERE posts.type_id = ? AND posts.is_repost != 1';
+        $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition $sortTypeCondition LIMIT ? OFFSET ?";
         return getDBDataFromArray($sql, $data, 'all');
     } 
 }
@@ -307,6 +350,11 @@ function getPaginationPosts(array $data, bool $needFilter = false) : ?array {
  */
 function getSearchPosts(string $searchQuery) : ?array {
     $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
+    return getDBDataFromArray($sql, [$searchQuery], 'all'); 
+}
+
+function getPostsByTag(string $searchQuery) : ?array {
+    $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts JOIN hashtags_posts JOIN hashtags LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = hashtags_posts.post_id AND hashtags.id = hashtags_posts.hashtag_id AND hashtags.hashtag = ?";
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 
@@ -797,4 +845,35 @@ function validateAddCommentForm(array $postRequest, array $requiredFields, int $
     }
 
     return $validateResult;
+}
+
+function increasePostView(int $postId, int $currentViewCount) : bool {
+    
+    $newCount = $currentViewCount + 1;
+    $sql = "UPDATE posts SET views_count = '$newCount' WHERE id = ?";
+    if (getPostData($postId)) {
+        return updateDBDataFromArray($sql, [$postId]);
+    }
+}
+
+function increaseReposts(int $postId, int $currentRepostCount) : bool {
+
+    $newCount = $currentRepostCount + 1; 
+    $sql = "UPDATE posts SET repost_count = '$newCount' WHERE id = ?";
+    
+    return updateDBDataFromArray($sql, [$postId]);
+    
+}
+
+function repostUserPost(int $postId, int $userId) : bool {
+    $sanitizedId = (int)filter_var($postId, FILTER_SANITIZE_NUMBER_INT);
+    $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, origin_user_id, origin_post_id) SELECT user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, user_id, id FROM posts WHERE id = ?";
+    $newPostId = insertDBDataFromArray($sql, [$postId]);
+
+    if ($newPostId) {
+        $sql = "UPDATE posts SET is_repost = true, user_id = ? WHERE id = ?";
+        return updateDBDataFromArray($sql, [$userId, $newPostId]);
+    } else {
+        return false;
+    }   
 }
