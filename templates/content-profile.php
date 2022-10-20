@@ -8,7 +8,7 @@
             <img class="profile__picture user__picture" src="<?= checkFilePath($userData['avatar']); ?>" alt="Аватар пользователя">
           </div>
           <div class="profile__name-wrapper user__name-wrapper">
-            <span class="profile__name user__name"><?= $userData['login']; ?></span>
+            <span class="profile__name user__name"><?= htmlspecialchars($userData['login']); ?></span>
             <time class="profile__user-time user__time"><?= getRelativeDateDifference(new DateTime($userData['register_date']), 'на сайте'); ?></time>
           </div>
         </div>
@@ -60,12 +60,12 @@
                     <header class="post__header">
                       <?php if ($post['is_repost']) : ?>
                         <div class="post__author">
-                          <a class="post__author-link" href="/profile?user=<?= getUserDataById($post['origin_user_id'])['login']; ?>" title="Автор">
+                          <a class="post__author-link" href="/profile?user=<?= htmlspecialchars(getUserDataById($post['origin_user_id'])['login']); ?>" title="Автор">
                             <div class="post__avatar-wrapper post__avatar-wrapper--repost">
                               <img class="post__author-avatar" src="<?= checkFilePath(getUserDataById($post['origin_user_id'])['avatar']); ?>" alt="Аватар пользователя">
                             </div>
                             <div class="post__info">
-                              <b class="post__author-name">Репост: <?= getUserDataById($post['origin_user_id'])['login']; ?></b>
+                              <b class="post__author-name">Репост: <?= htmlspecialchars(getUserDataById($post['origin_user_id'])['login']); ?></b>
                               <time class="post__time" datetime="2019-03-30T14:31"><?= getRelativeDateDifference(new DateTime($post['create_date']), 'назад'); ?></time>
                             </div>
                           </a>
@@ -78,27 +78,17 @@
                             <div class="post-photo__image-wrapper"> <img src="<?= checkFilePath($post['post_image']); ?>" alt="Фото от пользователя" width="760" height="396"> </div>
                         <?php elseif ($post['type_name'] == 'post-text') : ?>
                             <p>
-                                <?= cropText($post['post_text'], 200); ?>
+                                <?= htmlspecialchars(cropText($post['post_text'], 200)); ?>
                             </p>
                         <?php elseif ($post['type_name'] == 'post-video') : ?>
                         <div class="post-video__block">
                             <div class="post-video__preview">
-                            <?=embed_youtube_cover($post['post_video']); ?> <img src="img/coast.jpg" alt="Превью к видео" width="760" height="396"> </div>
-                            <div class="post-video__control">
-                            <button class="post-video__play post-video__play--paused button button--video" type="button"><span class="visually-hidden">Запустить видео</span></button>
-                            <div class="post-video__scale-wrapper">
-                                <div class="post-video__scale">
-                                <div class="post-video__bar">
-                                    <div class="post-video__toggle"></div>
-                                </div>
-                                </div>
-                            </div>
-                            <button class="post-video__fullscreen post-video__fullscreen--inactive button button--video" type="button"><span class="visually-hidden">Полноэкранный режим</span></button>
-                            </div>
-                            <button class="post-video__play-big button" type="button">
-                            <svg class="post-video__play-big-icon" width="27" height="28">
-                                <use xlink:href="#icon-video-play-big"></use>
-                            </svg> <span class="visually-hidden">Запустить проигрыватель</span> </button>
+                            <?=embed_youtube_cover($post['post_video']); ?></div>
+                            <a href="/post.php?post_id=<?= $post['id']; ?>" class="post-video__play-big button">
+                              <svg class="post-video__play-big-icon" width="27" height="28">
+                                  <use xlink:href="#icon-video-play-big"></use>
+                              </svg> <span class="visually-hidden">Запустить проигрыватель</span> 
+                        </a>
                         </div>
                         <?php elseif ($post['type_name'] == 'post-quote') : ?>
                             <blockquote>
@@ -144,7 +134,7 @@
                         <?php if (!empty(getHashtags($post['id']))) : ?>
                             <ul class="post__tags">
                                 <?php foreach (getHashtags($post['id']) as $tagIndex => $tag) : ?>      
-                                    <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= $tag['hashtag']; ?></a></li>
+                                    <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= htmlspecialchars($tag['hashtag']); ?></a></li>
                                 <?php endforeach; ?>
                             </ul>
                         <?php endif; ?>
@@ -163,12 +153,12 @@
                                 <div class="comments__info">
                                   <div class="comments__name-wrapper">
                                     <a class="comments__user-name" href="/profile.php?user=<?= $comment['login']; ?>">
-                                      <span><?= $comment['login'];?></span>
+                                      <span><?= htmlspecialchars($comment['login']); ?></span>
                                     </a>
                                     <time class="comments__time" datetime="2019-03-20"><?= getRelativeDateDifference(new DateTime($comment['create_date']), 'назад'); ?></time>
                                   </div>
                                   <p class="comments__text">
-                                    <?= $comment['comment'];?>
+                                    <?= htmlspecialchars($comment['comment']); ?>
                                   </p>
                                 </div>
                               </li>
@@ -207,7 +197,7 @@
                       </div>
                       <div class="post-mini__name-wrapper user__name-wrapper">
                         <a class="post-mini__name user__name" href="/profile.php?user=<?= $like['login'];?>">
-                          <span><?= $like['login'];?></span>
+                          <span><?= htmlspecialchars($like['login']); ?></span>
                         </a>
                         <div class="post-mini__action">
                           <span class="post-mini__activity user__additional">Лайкнул вашу публикацию</span>
@@ -243,7 +233,7 @@
                       </div>
                       <div class="post-mini__name-wrapper user__name-wrapper">
                         <a class="post-mini__name user__name" href="/profile.php?user=<?= $subscriber['login']; ?>">
-                          <span><?= $subscriber['login']; ?> <?= ($subscriber['id'] === $userId) ? ' (Это вы)' : ''; ?></span>
+                          <span><?= htmlspecialchars($subscriber['login']); ?> <?= ($subscriber['id'] === $userId) ? ' (Это вы)' : ''; ?></span>
                         </a>
                         <time class="post-mini__time user__additional" datetime="<?= $subscriber['register_date']; ?>"><?= getRelativeDateDifference(new DateTime($subscriber['register_date']), 'на сайте'); ?></time>
                       </div>

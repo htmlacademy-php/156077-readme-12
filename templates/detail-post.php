@@ -12,9 +12,9 @@
                     <div class="post__main">
                         <blockquote>
                         <p>
-                            <?= $postData['post_text']; ?>
+                            <?= htmlspecialchars($postData['post_text']); ?>
                         </p>
-                        <cite><?= $postData['quote_author']; ?></cite>
+                        <cite><?= htmlspecialchars($postData['quote_author']); ?></cite>
                         </blockquote>
                     </div>
                 </div>
@@ -24,7 +24,7 @@
                 <div class="post-details__image-wrapper post-text">
                     <div class="post__main">
                         <p>
-                            <?= $postData['post_text']; ?>
+                            <?= htmlspecialchars($postData['post_text']); ?>
                         </p>
                     </div>
                 </div>
@@ -36,10 +36,10 @@
                         <a class="post-link__external" href="http://<?= $postData['post_link']; ?>" title="Перейти по ссылке">
                             <div class="post-link__info-wrapper">
                                 <div class="post-link__icon-wrapper">
-                                <img src="https://www.google.com/s2/favicons?domain=<?= $postData['post_link']; ?>" alt="Иконка">
+                                  <img src="https://www.google.com/s2/favicons?domain=<?= htmlspecialchars($postData['post_link']); ?>" alt="Иконка">
                                 </div>
                                 <div class="post-link__info">
-                                <h3><?= $postData['post_link']; ?></h3>
+                                <h3><?= htmlspecialchars($postData['post_link']); ?></h3>
                                 </div>
                             </div>
                         </a>
@@ -95,7 +95,7 @@
             <?php if (!empty(getHashtags($postData['id']))) : ?>
                 <ul class="post__tags">
                     <?php foreach (getHashtags($postData['id']) as $tagIndex => $tag) : ?>      
-                        <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= $tag['hashtag']; ?></a></li>
+                        <li><a href="/search.php?search-phrase=<?= 'tag-' . $tag['hashtag'];?>">#<?= htmlspecialchars($tag['hashtag']); ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             <?php endif; ?>
@@ -119,12 +119,12 @@
                       <div class="comments__info">
                         <div class="comments__name-wrapper">
                           <a class="comments__user-name" href="/profile.php?user=<?= $comment['login']; ?>">
-                            <span><?= $comment['login'];?></span>
+                            <span><?= htmlspecialchars($comment['login']);?></span>
                           </a>
                           <time class="comments__time" datetime="<?= $comment['create_date']; ?>"><?= getRelativeDateDifference(new DateTime($comment['create_date']), 'назад'); ?></time>
                         </div>
                         <p class="comments__text">
-                          <?= $comment['comment'];?>
+                          <?= htmlspecialchars($comment['comment']); ?>
                         </p>
                       </div>
                     </li>
@@ -147,7 +147,7 @@
             </div>
             <div class="post-details__name-wrapper user__name-wrapper">
               <a class="post-details__name user__name" href="/profile.php?user=<?= $postData['login']; ?>">
-                <span><?= $postData['login']; ?></span>
+                <span><?= htmlspecialchars($postData['login']); ?></span>
               </a>
 
               <time class="post-details__time user__time" datetime="<?= $postData['register_date']; ?>"><?= getRelativeDateDifference(new DateTime($postData['register_date']), 'на сайте'); ?></time>
@@ -164,7 +164,7 @@
             </p>
           </div>
           <div class="post-details__user-buttons user__buttons">
-            <a href="/profile.php?subscribe_user=<?=$postData['user_id']; ?>" class="user__button user__button--subscription button button--main" >Подписаться</a>
+            <a href="/profile.php?subscribe_user=<?= $postData['user_id']; ?>" class="user__button user__button--subscription button button--main" >Подписаться</a>
             <a class="user__button user__button--writing button button--green" href="#">Сообщение</a>
           </div>
         </div>

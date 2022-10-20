@@ -10,7 +10,7 @@
               <span>Вы искали:</span>
             <?php endif; ?>
            
-            <span class="search__query-text">#<?= $searchQuery; ?></span>
+            <span class="search__query-text">#<?= htmlspecialchars($searchQuery); ?></span>
           </div>
         </div>
         <div class="search__results-wrapper">

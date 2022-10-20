@@ -117,7 +117,7 @@
                                     <cite><?= $post['quote_author']; ?></cite>
                                 </blockquote>
                             <?php elseif ($post['type_name'] == 'post-text') : ?>
-                                 <p><?= cropText($post['post_text'], 200); ?></p>
+                                 <p><?= htmlspecialchars(cropText($post['post_text'], 200)); ?></p>
                             <?php elseif ($post['type_name'] == 'post-photo') : ?>
                                 <div class="post-photo__image-wrapper">
                                     <img src="<?= checkFilePath($post['post_image']); ?>" alt="Фото от пользователя" width="360" height="240">
@@ -140,9 +140,8 @@
                                 <div class="post-video__block">
                                     <div class="post-video__preview">
                                         <?=embed_youtube_cover($post['post_video']); ?>
-                                        <img src="img/coast-medium.jpg" alt="Превью к видео" width="360" height="188">
                                     </div>
-                                    <a href="post-details.html" class="post-video__play-big button">
+                                    <a href="/post.php?post_id=<?= $post['id'];?>" class="post-video__play-big button">
                                         <svg class="post-video__play-big-icon" width="14" height="14">
                                             <use xlink:href="#icon-video-play-big"></use>
                                         </svg>
@@ -160,7 +159,7 @@
                                         <img class="post__author-avatar" src="<?= checkFilePath($post['avatar']); ?>" alt="Аватар пользователя">
                                     </div>
                                     <div class="post__info">
-                                        <b class="post__author-name"><?= $post['login']; ?></b>
+                                        <b class="post__author-name"><?= htmlspecialchars($post['login']); ?></b>
                                         <?php $date = new DateTime($post['create_date']); ?>                                
                                         <time class="post__time" title="<?= $date->format('d.m.Y H:i'); ?>" datetime="<?= $date->format('Y-m-d H:i:s'); ?>"><?= getRelativeDateDifference($date, 'назад'); ?></time>
                                     </div>

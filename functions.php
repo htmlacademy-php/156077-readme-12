@@ -8,7 +8,7 @@ require 'vendor/autoload.php';
 
 /**
  * Подключает к базе данных
- * @return {object} соединение с БД, либо выходит из скрипта
+ * @return object соединение с БД, либо выходит из скрипта
  */
 function dbConnection() : mysqli {
     $connectionMysql = new mysqli("localhost", "user", "Winserus89","readme"); 
@@ -21,8 +21,8 @@ function dbConnection() : mysqli {
 
 /**
  * Формироует строку типов переменных для передачи в подготовленный запрос
- * @param $data Массив переменных
- * @return [string} строка типов переменных для подготовленного запроса
+ * @param array $data Массив переменных
+ * @return string строка типов переменных для подготовленного запроса
  */
 function getVarTypes(array $data) : string {
     if (!$data) {
@@ -49,10 +49,10 @@ function getVarTypes(array $data) : string {
 
 /**
  * Получает записи БД из массива переменных с подготовкой sql выражения или без
- * @param [$sql] [sql_query] [простой массив переменных]
- * @param [$data] [array] [простой массив переменных]
- * @param [$resultsType] [string] [формат возвращаемых данных]
- * @return {mixed} массив данных или false
+ * @param string $sql sql запрос
+ * @param array $data простой массив переменных
+ * @param string $resultsType формат возвращаемых данных
+ * @return mixed массив данных или null
  */
 
 function getDBDataFromArray(string $sql, array $data = null, string $resultsType = 'single') : ?array {
@@ -66,21 +66,16 @@ function getDBDataFromArray(string $sql, array $data = null, string $resultsType
         $varTypes = getVarTypes($data);      
         $stmt = $mysqli->prepare($sql);
         
-        if ($stmt) {
-            $stmt->bind_param($varTypes, ...$data);
-            $stmt->execute();
-            $result = $stmt->get_result();    
-        } else {
-            return null;
-        }
+        $stmt->bind_param($varTypes, ...$data);
+        $stmt->execute();
+        $result = $stmt->get_result();    
         
         $mysqli->close();            
     }
     
     if ($resultsType == 'single') {     
         $result = $result->fetch_assoc();
-    }
-    if ($resultsType == 'all') {
+    } elseif ($resultsType == 'all') {
         $result = $result->fetch_all(MYSQLI_ASSOC);
     }
 
@@ -90,9 +85,9 @@ function getDBDataFromArray(string $sql, array $data = null, string $resultsType
 
 /**
  * Удаляет данные из БД подготовкой sql выражения
- * @param [$sql] [sql_query] [простой массив переменных]
- * @param [$data] [array] [простой массив переменных]
- * @return {mixed} результат stmp или false
+ * @param string $sql sql запрос
+ * @param array $data простой массив переменных
+ * @return bool результат stmp или false
  */
 function deleteDBDataFromArray(string $sql, array $data) : bool {
     $mysqli = dbConnection();
@@ -106,7 +101,6 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
         if ($stmt) {
             $stmt->bind_param($varTypes, ...$data);
             $stmt->execute();
-            $result = $stmt->get_result();    
         }   
 
         return true;  
@@ -115,9 +109,9 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
 
 /**
  * Обновляет данные в таблицах
- * @param [$sql] [sql_query] [простой массив переменных]
- * @param [$data] [array] [простой массив переменных]
- * @return {mixed} результат stmp или false
+ * @param string $sql sql запрос
+ * @param array $data простой массив переменных
+ * @return bool результат stmp или false
  */
 function updateDBDataFromArray(string $sql, array $data) : bool {
     $mysqli = dbConnection();
@@ -139,41 +133,36 @@ function updateDBDataFromArray(string $sql, array $data) : bool {
 
 /**
  * Делает запись в БД из массива переменных
- * @param [$data] [простой массив переменных]
- * @param [$sql] [sql string] [sql запрос]
- * @return {int} id добавленной записи
+ * @param string $sql sql запрос
+ * @param array $data простой массив переменных
+ * @return int id добавленной записи или null
  */
 
 function insertDBDataFromArray(string $sql, array $data) : ?int {
+    $mysqli = dbConnection();
 
     if (!$data) {
         $result = $mysqli->query($sql);
-    } elseif (!is_array($data)) {
-        return null;
     } else {
         $varTypes = getVarTypes($data);
-        $mysqli = dbConnection();
         $stmt = $mysqli->prepare($sql);
         if ($stmt) {
             $stmt->bind_param($varTypes, ...$data);
-            $stmt->execute();
-            $lastId = $mysqli->insert_id;
-        } else {
-            return false;
-        }
-        
-        $mysqli->close();  
-        
-        return $lastId;
+            $stmt->execute();       
+        }   
     }
-    
+
+    $result = $mysqli->insert_id;
+
+    $mysqli->close();
+    return $result; 
 }
 
 /**
  * Записывает в базу данных новый лайк поста
- * @param [$postId] [id поста]
- * @param [$userId] [id юзера]
- * @return {mixed} id добавленной записи или false
+ * @param int $postId id поста
+ * @param int $userId id юзера
+ * @return {mixed} id добавленной записи
  */
 function addPostLike(int $postId, int $userId) : int {
     $sql = "INSERT INTO likes (user_id, post_id) VALUES (?, ?)";
@@ -182,8 +171,8 @@ function addPostLike(int $postId, int $userId) : int {
 
 /**
  * Записывает в базу данных новый пост
- * @param [$data] [простой массив переменных с данными поста]
- * @return {mixed} id добавленной записи или false
+ * @param array $data простой массив переменных с данными поста
+ * @return int id добавленной записи 
  */
 function insertNewPost(array $data) : int {
     $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
@@ -192,8 +181,8 @@ function insertNewPost(array $data) : int {
 
 /**
  * Записывает в базу данных новый коммент
- * @param [$data] [простой массив переменных с данными комментария]
- * @return {mixed} id добавленной записи или false
+ * @param array $data простой массив переменных с данными комментария
+ * @return int id добавленной записи или false
  */
 function insertNewComment(array $data) : int {
     $sql = "INSERT INTO comments (user_id, post_id, comment) VALUES (?, ?, ?)";
@@ -202,8 +191,8 @@ function insertNewComment(array $data) : int {
 
 /**
  * Записывает в базу данных нового юзера
- * @param [$data] [простой массив переменных с данными юзера]
- * @return {mixed} id добавленной записи или false
+ * @param array $data простой массив переменных с данными комментария
+ * @return int id добавленной записи или false
  */
 function insertNewUser(array $data) : int {
     $sql = "INSERT INTO users (email, login, password, avatar) VALUES (?, ?, ?, ?)";
@@ -212,9 +201,9 @@ function insertNewUser(array $data) : int {
 
 /**
  * Записывает в базу теги поста
- * @param [$data] [array] [простой массив переменных с данными тегов]
- * @param [$insertTable] [string] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
- * @return {mixed} id добавленной записи или false
+ * @param array $data простой массив переменных с данными тегов
+ * @param string $insertTable флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту
+ * @return int id добавленной записи или false
  */
 function insertPostTags(array $data, string $insertTable) : int {
     $sqlTagsPostsPrepare = "INSERT INTO hashtags_posts (post_id, hashtag_id) VALUES (?, ?)";
@@ -230,9 +219,9 @@ function insertPostTags(array $data, string $insertTable) : int {
 
 /**
  * Произовдит подписку на пользователя
- * @param [$subscriberId] [int] [id подписывающегося юзера]
- * @param [$subscribedUserId] [int] [флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту]
- * @return {mixed} id добавленной записи или false
+ * @param int $subscriberId id подписывающегося юзера
+ * @param int $subscribedUserId int флаг в какую таблицу нужно сделать запись тэга - со списком тегов или с соответсвием тега посту
+ * @return int id добавленной записи или false
  */
 function subscribeUser(int $subscriberId, int $subscribedUserId) : int {
     $sql = "INSERT INTO subscribes (subscriber_id, subscribed_user_id) VALUES (?, ?)";
@@ -241,8 +230,8 @@ function subscribeUser(int $subscriberId, int $subscribedUserId) : int {
 
 /**
  * Получает id типа поста по его имени
- * @param [$postTypeName] [string] [название типа поста]
- * @return {mixed} id типа поста или false
+ * @param string $postTypeName название типа поста
+ * @return mixed id типа поста или null
  */
 
 function getPostTypeIdByName(string $postTypeName) : ?int {
@@ -252,8 +241,8 @@ function getPostTypeIdByName(string $postTypeName) : ?int {
 
 /**
  * Получает id хештэга по его имени
- * @param [$tag] [string] [название хештега]
- * @return {mixed} id хештега или false
+ * @param string $tag название хештега
+ * @return mixed id хештега или false
  */
 function getHashtagIdByName(string $tag)  : ?int {
     $sql = "SELECT id FROM hashtags WHERE hashtag = ?";
@@ -262,8 +251,8 @@ function getHashtagIdByName(string $tag)  : ?int {
 
 /**
  * Получает данные поста по его id
- * @param [$postId] [int] [id поста]
- * @return {mixed} массив данных поста или false
+ * @param int $postId] id поста
+ * @return mixed массив данных поста или null
  */
 function getPostData(int $postId) : ?array {
     $sql= "SELECT posts.*, post_types.name as type_name, users.avatar, users.register_date, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = ?";
@@ -272,8 +261,8 @@ function getPostData(int $postId) : ?array {
 
 /**
  * Получает комментарии к посту
- * @param [$postId] [int] [id поста]
- * @return {mixed} массив комментариев или false
+ * @param int $postId id поста
+ * @return mixed массив комментариев или null
  */
 function getPostComments(int $postId) : ?array {
     $sql = "SELECT comments.*, users.avatar, users.login FROM comments LEFT JOIN users ON users.id = comments.user_id WHERE comments.post_id = ?";
@@ -282,17 +271,17 @@ function getPostComments(int $postId) : ?array {
 
 /**
  * Получает данные всех постов
- * @param [$postsTypeID] [string] [id типа поста для фильтрации]
- * @return {mixed} массив данных постов или false
+ * @param string $postsTypeID id типа поста для фильтрации
+ * @return mixed массив данных постов или null
  */
 function getPosts(string $postsTypeId = '', string $sortType) : ?array {
     $sortTypeCondition = "ORDER BY posts.views_count DESC";
     if ($sortType === 'date') {
         $sortTypeCondition = "ORDER BY post_create_date DESC";
-    }
-    if ($sortType === 'likes') {
+    } elseif ($sortType === 'likes') {
         $sortTypeCondition = "ORDER BY likes_count DESC";
     }
+    
     if (!empty($postsTypeId)) {
         $condition = "WHERE posts.type_id = ?";
         $sql = "SELECT posts.*, DATE(posts.create_date) AS post_create_date, (SELECT COUNT(*) FROM likes WHERE likes.post_id = posts.id) AS likes_count, post_types.name as type_name, users.avatar, users.login FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id $condition $sortTypeCondition";
@@ -305,9 +294,9 @@ function getPosts(string $postsTypeId = '', string $sortType) : ?array {
 
 /**
  * Получает посты юзера
- * @param [$userId ] [string] [id типа поста для фильтрации]
- * @param [$postsTypeID] [string] [id типа поста для фильтрации]
- * @return {mixed} массив данных постов или false
+ * @param string $userId id типа поста для фильтрации
+ * @param string $postsTypeID id типа поста для фильтрации
+ * @return mixed массив данных постов или null
  */
 function getUserPosts(string $userId = '', string $postsTypeId = '') : ?array {
     if (!empty($postsTypeId)) { 
@@ -322,9 +311,9 @@ function getUserPosts(string $userId = '', string $postsTypeId = '') : ?array {
 
 /**
  * Получает посты для пагинаций
- * @param [$postsTypeID] [int] [id типа поста для фильтрации]
- * @param [$needFilter] [bool] [определяет нужен ли фильтр постов по типу]
- * @return {mixed} массив данных постов или false
+ * @param int $postsTypeID id типа поста для фильтрации
+ * @param bool $needFilter определяет нужен ли фильтр постов по типу
+ * @return mixed массив данных постов или null
  */
 function getPaginationPosts(array $data, string $sortType, bool $needFilter = false) : ?array {
     $sortTypeCondition = "ORDER BY posts.views_count DESC";
@@ -348,14 +337,19 @@ function getPaginationPosts(array $data, string $sortType, bool $needFilter = fa
 
 /**
  * Получает данные постов согласно критерию поиска
- * @param [$searchQuery] [string] [Поисковая фраза]
- * @return {mixed} массив данных постов или false
+ * @param string $searchQuery string поисковая фраза
+ * @return mixed массив данных постов или null
  */
 function getSearchPosts(string $searchQuery) : ?array {
     $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE MATCH(header, post_text) AGAINST(?)";
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
 }
 
+/**
+ * Получает данные постов по соответствию тегу
+ * @param string $searchQuery string поисковая фраза
+ * @return mixed массив данных постов или null
+ */
 function getPostsByTag(string $searchQuery) : ?array {
     $sql = "SELECT posts.*, post_types.name as type_name, users.login, users.avatar FROM posts JOIN hashtags_posts JOIN hashtags LEFT JOIN post_types ON post_types.id = posts.type_id LEFT JOIN users ON users.id = posts.user_id WHERE posts.id = hashtags_posts.post_id AND hashtags.id = hashtags_posts.hashtag_id AND hashtags.hashtag = ?";
     return getDBDataFromArray($sql, [$searchQuery], 'all'); 
@@ -363,10 +357,10 @@ function getPostsByTag(string $searchQuery) : ?array {
 
 /**
  * Подсчитывает количество записей в переданной таблице по переданному столбцу
- * @param [$dataCount] [all] [значение столбца таблицы для подсчета]
- * @param [$dataCol] [string] [столбец таблицы]
- * @param [$table] [string] [название таблицы]
- * @return {string} количество записей с [$dataCount]
+ * @param string $dataCount значение столбца таблицы для подсчета
+ * @param string string столбец таблицы
+ * @param string $table название таблицы
+ * @return string количество записей с $dataCount
  */
 function getDBDataCount(string $dataCount, string $dataCol, string $table) : string {
 
@@ -378,8 +372,8 @@ function getDBDataCount(string $dataCount, string $dataCol, string $table) : str
 
  /**
  * Получает массив id подписок
- * @param [$subscribedUserId] [int] [id юзера, подписчиков, которого нужно получить]
- * @return {miixed} массив id подписанных юзеров или false
+ * @param int $subscribedUserId id юзера, подписчиков, которого нужно получить
+ * @return mixed массив id подписанных юзеров или null
  */
 function getSubscribers(int $subscriber_id) : ?array {
     $sql = "SELECT subscribed_user_id FROM subscribes WHERE subscriber_id = ?";
@@ -388,8 +382,8 @@ function getSubscribers(int $subscriber_id) : ?array {
 
  /**
  * Получает массив постов пользователя, которым ставили лайк
- * @param [$userId] [int] [id юзера, лаки постов, которого нужно получить]
- * @return {miixed} массив id подписанных юзеров или false
+ * @param int $userId id юзера, лаки постов, которого нужно получить
+ * @return mixed массив id подписанных юзеров или null
  */
 function getLikedUserPosts(int $userId) : ?array {
     $sql = "SELECT posts.*, likes.user_id as like_from_user, likes.like_date, users.login, users.avatar FROM posts LEFT JOIN likes ON likes.post_id = posts.id LEFT JOIN users ON likes.user_id = users.id WHERE posts.user_id = ? AND posts.id = likes.post_id;";
@@ -398,9 +392,9 @@ function getLikedUserPosts(int $userId) : ?array {
 
 /**
  * Получает id пользователя по логину
- * @param [$subscribeUserId] [int] [id юзера, на которого подписка]
- * @param [$userId] [int] [id подписчика]
- * @return {mixed} id записи или false
+ * @param int $subscribeUserId id юзера, на которого подписка
+ * @param int $userId id подписчика
+ * @return mixed id записи или null
  */
 function checkSubscription(int $subscribeUserId, int $userId ) : ?array {
     $sql = "SELECT id FROM subscribes WHERE subscriber_id = ? AND subscribed_user_id = ?";
@@ -409,9 +403,9 @@ function checkSubscription(int $subscribeUserId, int $userId ) : ?array {
 
 /**
  * Удаляет запись о подписке
- * @param [$subscribedUserId] [int] [id юзера, на которого подписка]
- * @param [$userId] [int] [id подписчика]
- * @return {mixed} id записи или false
+ * @param int $subscribedUserId id юзера, на которого подписка
+ * @param int $userId id подписчика
+ * @return bool
  */
 function deleteSubscription(int $subscribedUserId, int $userId) : bool {
     $sql =  "DELETE FROM subscribes WHERE subscriber_id = ? AND subscribed_user_id = ?";
@@ -420,7 +414,7 @@ function deleteSubscription(int $subscribedUserId, int $userId) : bool {
 
 /**
  * Получает список типов постов
- * @return {mixed} массив типов постов или false
+ * @return mixed массив типов постов или null
  */
 
 function getPostTypes() : ?array {
@@ -431,9 +425,9 @@ function getPostTypes() : ?array {
 }
 
 /**
- * Получает списокхештегов поста
- * @param [$postId] [int] [id поста]
- * @return {mixed} массив тегов или false
+ * Получает список хештегов поста
+ * @param int $postId id поста
+ * @return mixed массив тегов или null
  */
 function getHashtags(int $postId) : ?array {
     $sql = "SELECT hashtag FROM hashtags LEFT JOIN hashtags_posts ON hashtags.id = hashtags_posts.hashtag_id WHERE hashtags_posts.post_id = '$postId'";
@@ -444,8 +438,8 @@ function getHashtags(int $postId) : ?array {
 
 /**
  * Получает значение параметра GET запроса
- * @param [$paramName] [string] [название параметра]
- * @return {string} значение переданного параметра или null, если параметра нет
+ * @param string $paramName название параметра
+ * @return string значение переданного параметра или null, если параметра нет
  */
 
 function getQueryParam(string $paramName) : string {
@@ -468,9 +462,9 @@ function getQueryParam(string $paramName) : string {
 }
 
 /**
- * Получает id пользователя по логину
- * @param [$login] [sring] [логин пользователя]
- * @return {array} массив данных пользователя
+ * Получает данные пользователя по логину
+ * @param string $login логин пользователя
+ * @return array массив данных пользователя или null
  */
 function getUserDataByLogin(string $login) : ?array {
     $sql = "SELECT * FROM users WHERE login = '$login'";
@@ -478,9 +472,9 @@ function getUserDataByLogin(string $login) : ?array {
 }
 
 /**
- * Получает id пользователя по логину
- * @param [$login] [sring] [id пользователя]
- * @return {array} массив данных пользователя
+ * Получает данные пользователя по id
+ * @param string $id id пользователя
+ * @return array массив данных пользователя или null
  */
 function getUserDataById(int $id) : ?array {
     $sql = "SELECT * FROM users WHERE id = '$id'";
@@ -489,11 +483,11 @@ function getUserDataById(int $id) : ?array {
 
 /**
  * Перемещает загруженный файл в папку
- * @param [$file] [file_object] [массив данных о файле из $_FILES]
- * @param [$subDirectory] string] [дполнительная директива, отвечающая за подпапку для сохранения файла]
- * @return {none}
+ * @param array [$file] массив данных о файле из $_FILES
+ * @param string $subDirectory дполнительная директива, отвечающая за подпапку для сохранения файла
+ * @return void
  */
-function moveUploadedImg(array $file, string $subDirectory = '') {
+function moveUploadedImg(array $file, string $subDirectory = '') : void {
 
     $file_name = $file['name'];
     $file_path = __DIR__ . '/uploads/' . $subDirectory;
@@ -504,22 +498,20 @@ function moveUploadedImg(array $file, string $subDirectory = '') {
 
 /**
  * Валидация на пустоту
- * @param [$name] [string] [имя поля]
- * @return {bool} Результат проверки
+ * @param string $name имя поля
+ * @return bool Результат проверки
  */
 
 function validateEmptyFilled(string $name) : bool {
-    if ($_POST[$name] == '') {
-        return false;
-    } else {
-        return true;
-    }
+    
+    return !($_POST[$name] == '');
+    
 }
 
 /**
  * Валидация на корректность ссылки
- * @param [$name] [string] [имя поля]
- * @return {bool} Результат проверки
+ * @param string $name имя поля
+ * @return bool Результат проверки
  */
 function validateLink(string $name) : bool {
     $validateLink = filter_var($_POST[$name], FILTER_VALIDATE_URL, FILTER_FLAG_PATH_REQUIRED);
@@ -532,15 +524,17 @@ function validateLink(string $name) : bool {
 
 /**
  * Сохранение изображения по ссылке
- * @param [$name] [string] [имя поля]
- * @param [$name] [bool] [если true, функция просто возрвразает название файла]
- * @return {string} скачивает фото, перемещает в папку и возвращает результат в текстовом формате
+ * @param string $name имя поля
+ * @param bool $name если true, функция просто возрвразает название файла
+ * @return string скачивает фото, перемещает в папку и возвращает результат в текстовом формате
  */
 function downloadImageLink(string $name, bool $getImgName = false) : string {
     $imgUrl = $_POST[$name];
     $imgName = array_pop(explode('/', $imgUrl));
 
-    if ($getImgName) return $imgName;
+    if ($getImgName) {
+        return $imgName;
+    }
 
     $headers = get_headers($imgUrl);
     if(preg_match("|200|", $headers[0])) {
@@ -557,53 +551,45 @@ function downloadImageLink(string $name, bool $getImgName = false) : string {
 
 /**
  * Валидация загруженного файла
- * @param [$file] [file_data] [массив данных файла из $_FILES]
- * @return {string} Результат проверки
+ * @param array $file массив данных файла из $_FILES
+ * @return string результат проверки
  */
 function validateUploadedFile(array $file) : string {
     $fileType = $file['type'];
     $fileSize = $file['size'];
 
     $allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if ($fileSize > 0) {
-        if (in_array($fileType, $allowedFileTypes)) {       
-            return 'success';
-        } else {
-            return 'Недопустимый формат фото. Разрещены: gif, png, jpeg';
-        }
-        
+
+    if ($fileSize > 0 && in_array($fileType, $allowedFileTypes)) {
+        return 'success';
     } else {
-        return 'Размер файла 0 байт или изображение не загружено';
+        return 'Недопустимый формат фото. Разрещены: gif, png, jpeg, либо файл не загружен';
     }
 }
 
 /**
  * Валидация тегов
- * @param [$tags] [string] [строка тегов]
- * @return {bool} Результат проверки
+ * @param string $tags строка тегов
+ * @return int результат проверки
  */
-function validateTags(string $tags) : bool {
+function validateTags(string $tags) : int {
     $tags = explode(' ', $tags);
     foreach ($tags as $tagIndex => $tag) {
-        if(!preg_match('/^[a-zа-яё]+$/iu', $tag)) {
-            return false;
-        }         
-    }
-
-    return true;
+        return preg_match('/^[a-zа-яё]+$/iu', $tag);          
+    } 
 }
 
 /**
  * Валидация почты
- * @param [$mail] [string] [почта]
- * @return {mixed} Результат проверки или false
+ * @param string $mail почта
+ * @return mixed результат проверки или null
  */
-function validateEmail(string $mail) {
+function validateEmail(string $mail) : ?array {
     $emailValid = filter_var($mail, FILTER_VALIDATE_EMAIL);
     if ($emailValid) {
         return checkDBUserData('email', $mail);
     }  else {
-        return false;
+        return null;
     }   
 }
 
@@ -640,8 +626,8 @@ function checkDBUserData(string $fieldToCheck, string $value) : array {
 
 /**
  * Получает хеш пароля пользователя из БД
- * @param [$login] [string] [логин]
- * @return {bool} результат проверки
+ * @param string $login логин
+ * @return bool результат проверки
  */
 function verifyUserAuthPassword(string $login, string $password) : bool {
     $sql = "SELECT password FROM users WHERE login = ?";
@@ -652,24 +638,20 @@ function verifyUserAuthPassword(string $login, string $password) : bool {
 
 /**
  * Проверяет записан ли пароль для переданного логина
- * @param [$login] [string] [логин]
- * @return {bool} результат проверки
+ * @param string $login логин
+ * @return bool результат проверки
  */
 function checkUserPassword(string $login) : bool {
     $sql = "SELECT password FROM users WHERE login = ?";
     $DBpassword = getDBDataFromArray($sql, [$login])['password'];
 
-    if ($DBpassword) {
-        return true;
-    } else {
-        return false;
-    }
+    return (bool)$DBpassword;
 }
 
 /**
  * Валидация логина
- * @param [$login] [string] [логин]
- * @return {mixed} Результат проверки или false
+ * @param string $login логин
+ * @return array Результат проверки или false
  */
 function validateLogin(string $login) : array {
     $loginValid = checkLength($login, 20);
@@ -682,37 +664,27 @@ function validateLogin(string $login) : array {
 
 /**
  * Проверка логина пользователя на предмет существования в БД
- * @param [$login] [string] [логин]
- * @return {bool} результат проверки
+ * @param string $login логин
+ * @return bool результат проверки
  */
 function checkLength(string $text, int $length) : bool {
- 
-    if (strlen($text) > $length) {
-        return false;
-    } else {
-        return true;
-    }
-
+    return !(strlen($text) > $length);
 }
 
 /**
  * Валидация пароля
- * @param [$password] [string] [пароль]
- * @param [$passwordRepeat] [string] [повтор пароля]
- * @return {bool} Результат проверки
+ * @param string $password пароль
+ * @param string $passwordRepeat повтор пароля
+ * @return bool результат проверки
  */
 function validatePassword(string $password, string $passwordRepeat) : bool {
-    if ($_POST[$password] == $_POST[$passwordRepeat]) {
-       return true;
-    }  else {
-        return false;
-    }   
+    return ($_POST[$password] == $_POST[$passwordRepeat]);
 }
 
 /**
  * Преобразования массива ошибок из нескольких форм в единый список разных ошибок
- * @param [$errorsList] [array] [многомерный массив с результатами проверки форм]
- * @return {array} Массив ошибок без учета к какой форме они относятся
+ * @param array $errorsList многомерный массив с результатами проверки форм
+ * @return array массив ошибок без учета к какой форме они относятся
  */
 function getFormValidateErrors(array $errorsList) : array {
     $validateErrors = [];
@@ -728,8 +700,8 @@ function getFormValidateErrors(array $errorsList) : array {
 
 /**
  * Проверяет существование фото в папках
- * @param [$fileName] [string] [название файла]
- * @return {string} Путь к файлу
+ * @param string $fileName название файла
+ * @return string путь к файлу
  */
 function checkFilePath(string $fileName) : string {
 
@@ -754,9 +726,9 @@ function checkFilePath(string $fileName) : string {
 
 /**
  * Обрезает $text до $cropSybmols
- * @param [string] [$text] [текст для обрезки]
- * @param [int] [$cropSybmols] [до какого кол-ва символов обрезать]
- * @return {string} обрезанная строка со ссылкой Читать далее
+ * @param string $text текст для обрезки
+ * @param int $cropSybmols до какого кол-ва символов обрезать
+ * @return string обрезанная строка со ссылкой Читать далее
  */
 
 function cropText(string $text, int $cropSybmols = 300) : string {
@@ -786,9 +758,9 @@ function cropText(string $text, int $cropSybmols = 300) : string {
  
 /**
  * Сравнивает дату $date c текущей
- * @param [date object] [$date] [объект произовлаьной даты]
- * @param [string] [$words] [добавочное слово после вывода временного периода]
- * @return {string} количество времени прошедшего с $date до текущей даты в относительном формате
+ * @param object $date объект произовлаьной даты
+ * @param string $words добавочное слово после вывода временного периода
+ * @return string количество времени прошедшего с $date до текущей даты в относительном формате
  */
 
 function getRelativeDateDifference (DateTime $date, string $words) : string {
@@ -796,7 +768,6 @@ function getRelativeDateDifference (DateTime $date, string $words) : string {
     $currentDate = new DateTime();
     $dateDiff = $date->diff($currentDate);
 
-    $relativeDate = '';
     switch (true) {
         case ($dateDiff->days / 7 >= 5 ) :
             return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form((int)floor($dateDiff->m), 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
@@ -818,6 +789,12 @@ function getRelativeDateDifference (DateTime $date, string $words) : string {
     }
 }
 
+/**
+ * Проводит валидацию полей формы добавления комментария
+ * @param array $postRequest массив отправленных данных
+ * @param array $requiredFields массив обязательных полей
+ * @return array результирующий массив проверки
+ */
 function validateAddCommentForm(array $postRequest, array $requiredFields, int $commentLength) : array {
 
     $validateResult = [];
@@ -850,6 +827,12 @@ function validateAddCommentForm(array $postRequest, array $requiredFields, int $
     return $validateResult;
 }
 
+/**
+ * Устанавливает количество просмотров поста
+ * @param int $postId id поста
+ * @param int $currentViewCount текущее количество просмотров
+ * @return bool
+ */
 function increasePostView(int $postId, int $currentViewCount) : bool {
     
     $newCount = $currentViewCount + 1;
@@ -859,6 +842,12 @@ function increasePostView(int $postId, int $currentViewCount) : bool {
     }
 }
 
+/**
+ * Устанавливает количество репостов
+ * @param int $postId id поста
+ * @param int $currentRepostCount текущее количество репостов
+ * @return bool
+ */
 function increaseReposts(int $postId, int $currentRepostCount) : bool {
 
     $newCount = $currentRepostCount + 1; 
@@ -868,6 +857,12 @@ function increaseReposts(int $postId, int $currentRepostCount) : bool {
     
 }
 
+/**
+ * Копирует пост и подменяет id юзера, и устанавливает признак репоста
+ * @param int $postId id поста
+ * @param int $userId id юзера, делающего репост
+ * @return bool
+ */
 function repostUserPost(int $postId, int $userId) : bool {
     $sanitizedId = (int)filter_var($postId, FILTER_SANITIZE_NUMBER_INT);
     $sql = "INSERT INTO posts (user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, origin_user_id, origin_post_id) SELECT user_id, type_id, header, post_text, quote_author, post_image, post_video, post_link, user_id, id FROM posts WHERE id = ?";
@@ -881,6 +876,13 @@ function repostUserPost(int $postId, int $userId) : bool {
     }   
 }
 
+/**
+ * Отправляет письмо на почту
+ * @param string $to почта получателя
+ * @param string $subject тема сообщения
+ * @param string $text текст сообщения
+ * @return void
+ */
 function sendEmail(string $to, string $subject, string $text) : void {
     // Конфигурация траспорта
     $dsn = 'smtp://rush89@list.ru:Pe23htFpg9ugYgSymqsK@smtp.mail.ru:465';
@@ -893,5 +895,9 @@ function sendEmail(string $to, string $subject, string $text) : void {
     $message->text($text);
     // Отправка сообщения
     $mailer = new Mailer($transport);
-    $mailer->send($message);
+    try {
+        $mailer->send($message);
+    } catch (Exception $e) {
+        $e->getMessage();
+    }
 }
