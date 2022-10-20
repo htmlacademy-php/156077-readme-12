@@ -22,7 +22,8 @@
         http_response_code(404);
         $content = include_template( '404.php'); 
         $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName]);
-        print($layout);       
+        print($layout);
+        exit();       
     }
  
     $comments = getPostComments($postData['id']);
