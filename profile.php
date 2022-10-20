@@ -40,7 +40,7 @@ if (!empty($subscribeUserId)) {
         $subscribeNotice = 'Вы подписались на пользователя';
         // Формирование сообщение для уведомления подписчиков
         $to = $userData['email'];
-        $subject = 'У вас новый попдисчик';
+        $subject = 'У вас новый подписчик';
         $text = 'Здравствуйте,' . $userData['login'] . '. На вас подписался новый пользователь ' . $userName . '. Вот ссылка на его профиль: http://156077-readme-12/profile.php?user=' . $userName;
         sendEmail($to, $subject, $text);
     }

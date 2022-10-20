@@ -134,7 +134,7 @@
                 $subscriberData = getUserDataById($subscriber['subscribed_user_id']);
                 $to = $userData['email'];
                 $subject = 'Новая публикация от пользователя ' . $userName;
-                $text = 'Здравствуйте,' . $subscriber['login'] . '. Пользователь ' . $userData['login'] . 'только что опубликовал новую запись' . $postHeader . '. Посмотрите её на странице пользователя: http://156077-readme-12/profile.php?user=' . $userData['login'];
+                $text = 'Здравствуйте,' . $subscriber['login'] . '. Пользователь ' . $userData['login'] . ' только что опубликовал новую запись ' . $postHeader . '. Посмотрите её на странице пользователя: http://156077-readme-12/profile.php?user=' . $userData['login'];
                 sendEmail($to, $subject, $text);
             }         
         }

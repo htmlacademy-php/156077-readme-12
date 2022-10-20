@@ -21,7 +21,6 @@ function dbConnection() : mysqli {
 
 /**
  * Формироует строку типов переменных для передачи в подготовленный запрос
- *
  * @param $data Массив переменных
  * @return [string} строка типов переменных для подготовленного запроса
  */
@@ -131,8 +130,7 @@ function updateDBDataFromArray(string $sql, array $data) : bool {
         
         if ($stmt) {
             $stmt->bind_param($varTypes, ...$data);
-            $stmt->execute();
-            $result = $stmt->get_result();    
+            $stmt->execute(); 
         }   
 
         return true;  
@@ -544,7 +542,7 @@ function downloadImageLink(string $name, bool $getImgName = false) : string {
 
     if ($getImgName) return $imgName;
 
-    $headers = @get_headers($imgUrl);
+    $headers = get_headers($imgUrl);
     if(preg_match("|200|", $headers[0])) {
         $image = file_get_contents($imgUrl);
     }
@@ -883,7 +881,7 @@ function repostUserPost(int $postId, int $userId) : bool {
     }   
 }
 
-function sendEmail(string $to, string $subject, string $text) : bool {
+function sendEmail(string $to, string $subject, string $text) : void {
     // Конфигурация траспорта
     $dsn = 'smtp://rush89@list.ru:Pe23htFpg9ugYgSymqsK@smtp.mail.ru:465';
     $transport = Transport::fromDsn($dsn);
@@ -896,6 +894,4 @@ function sendEmail(string $to, string $subject, string $text) : bool {
     // Отправка сообщения
     $mailer = new Mailer($transport);
     $mailer->send($message);
-
-    return true;
 }
