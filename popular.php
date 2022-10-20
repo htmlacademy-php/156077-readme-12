@@ -58,7 +58,3 @@
         ] );     
     $layout = include_template( 'layout.php', ['content' => $content, 'title' => $title, 'userName' => $userName]);
     print($layout); 
-    
-
-    
-?>

@@ -13,8 +13,6 @@ $searchQuery = filter_var($_GET['search-phrase'], FILTER_SANITIZE_STRING);
 if (substr($searchQuery, 0, 3) == 'tag') {
     $searchQuery = substr($searchQuery, 4);
     $searchTagMode = true;
-} else {
-    $searchQuery = filter_var($_GET['search-phrase'], FILTER_SANITIZE_STRING);
 }
 
 if ($searchTagMode) {

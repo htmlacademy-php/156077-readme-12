@@ -7,6 +7,7 @@ if (!isset($_SESSION['user'])) {
 
 require_once 'helpers.php';
 require_once 'functions.php';
+
 date_default_timezone_set('Europe/Moscow');
 define('COMMENT_MIN_LENGTH', 4);
 $userProfileName = getQueryParam('user');
@@ -37,6 +38,11 @@ if (!empty($subscribeUserId)) {
         $subscribeNotice = 'Вы уже подписаны на этого пользователя';
     } else {
         $subscribeNotice = 'Вы подписались на пользователя';
+        // Формирование сообщение для уведомления подписчиков
+        $to = $userData['email'];
+        $subject = 'У вас новый подписчик';
+        $text = 'Здравствуйте,' . $userData['login'] . '. На вас подписался новый пользователь ' . $userName . '. Вот ссылка на его профиль: http://156077-readme-12/profile.php?user=' . $userName;
+        sendEmail($to, $subject, $text);
     }
     $prevUrl = $_SERVER['HTTP_REFERER'];
     header("Location: $prevUrl");
