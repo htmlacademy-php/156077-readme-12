@@ -3,7 +3,7 @@
     <h1 class="page__title page__title--publication"><?= $postData['header']; ?></h1>
     <section class="post-details">
       <h2 class="visually-hidden">Публикация</h2>
-      <div class="post-details__wrapper post-photo">
+      <div class="post-details__wrapper <?= $postData['type_name']; ?>">
         <div class="post-details__main-block post post--details">
            
             <?php if ($postData['type_name'] == 'post-quote') : ?>
