@@ -93,6 +93,7 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
     $mysqli = dbConnection();
     
     if (!$data) {
+        $mysqli->close();
         return false;
     } else {     
         $varTypes = getVarTypes($data);      
@@ -102,7 +103,7 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
             $stmt->bind_param($varTypes, ...$data);
             $stmt->execute();
         }   
-
+        $mysqli->close();
         return true;  
     } 
 }
@@ -127,6 +128,7 @@ function updateDBDataFromArray(string $sql, array $data) : bool {
             $stmt->execute(); 
         }   
 
+        $mysqli->close();
         return true;  
     } 
 }

@@ -12,7 +12,7 @@
     $userName = $_SESSION['user'];
 
     $postId = getQueryParam('post_id');
-    $postData = [];
+  
     if (!empty($postId)) {
         $postData = getPostData($postId);
         increasePostView($postId, $postData['views_count']);
