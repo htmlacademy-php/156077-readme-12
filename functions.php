@@ -93,6 +93,7 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
     $mysqli = dbConnection();
     
     if (!$data) {
+        $mysqli->close();
         return false;
     } else {     
         $varTypes = getVarTypes($data);      
@@ -102,7 +103,7 @@ function deleteDBDataFromArray(string $sql, array $data) : bool {
             $stmt->bind_param($varTypes, ...$data);
             $stmt->execute();
         }   
-
+        $mysqli->close();
         return true;  
     } 
 }
@@ -127,6 +128,7 @@ function updateDBDataFromArray(string $sql, array $data) : bool {
             $stmt->execute(); 
         }   
 
+        $mysqli->close();
         return true;  
     } 
 }
@@ -142,7 +144,7 @@ function insertDBDataFromArray(string $sql, array $data) : ?int {
     $mysqli = dbConnection();
 
     if (!$data) {
-        $result = $mysqli->query($sql);
+        $mysqli->query($sql);
     } else {
         $varTypes = getVarTypes($data);
         $stmt = $mysqli->prepare($sql);
@@ -319,9 +321,7 @@ function getPaginationPosts(array $data, string $sortType, bool $needFilter = fa
     $sortTypeCondition = "ORDER BY posts.views_count DESC";
     if ($sortType === 'date') {
         $sortTypeCondition = "ORDER BY post_create_date DESC";
-    }
-
-    if ($sortType === 'likes') {
+    } elseif ($sortType === 'likes') {
         $sortTypeCondition = "ORDER BY likes_count DESC";
     }
 
@@ -770,22 +770,22 @@ function getRelativeDateDifference (DateTime $date, string $words) : string {
 
     switch (true) {
         case ($dateDiff->days / 7 >= 5 ) :
-            return $relativeDate = $dateDiff->m  . ' ' . get_noun_plural_form((int)floor($dateDiff->m), 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
+            return $dateDiff->m  . ' ' . get_noun_plural_form((int)floor($dateDiff->m), 'месяц', 'месяца', 'месяцев') . ' ' . $words; 
         
         case ($dateDiff->days / 7 >= 1 && $dateDiff->days / 7 < 5) :
-            return $relativeDate = floor($dateDiff->days / 7) . ' ' . get_noun_plural_form((int)floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
+            return floor($dateDiff->days / 7) . ' ' . get_noun_plural_form((int)floor($dateDiff->days / 7), 'неделя', 'недели', 'недель') . ' ' . $words;
 
         case ($dateDiff->d >= 1 && $dateDiff->d < 7) :
-            return $relativeDate = $dateDiff->d . ' ' . get_noun_plural_form((int)floor($dateDiff->d), 'день', 'дня', 'дней') . ' ' . $words;
+            return $dateDiff->d . ' ' . get_noun_plural_form((int)floor($dateDiff->d), 'день', 'дня', 'дней') . ' ' . $words;
         
         case ($dateDiff->h >= 1 && $dateDiff->h < 24) :
-            return $relativeDate = $dateDiff->h . ' ' . get_noun_plural_form((int)floor($dateDiff->h), 'час', 'часа', 'часов') . ' ' . $words;
+            return $dateDiff->h . ' ' . get_noun_plural_form((int)floor($dateDiff->h), 'час', 'часа', 'часов') . ' ' . $words;
 
         case ($dateDiff->i > 0 && $dateDiff->i < 60) :
-            return $relativeDate = $dateDiff->i . ' ' . get_noun_plural_form((int)floor($dateDiff->i), 'минута', 'минуты', 'минут') . ' ' . $words;
+            return $dateDiff->i . ' ' . get_noun_plural_form((int)floor($dateDiff->i), 'минута', 'минуты', 'минут') . ' ' . $words;
 
         default:
-            return $relativeDate = $date->format('d.m.Y H:i');
+            return $date->format('d.m.Y H:i');
     }
 }
 

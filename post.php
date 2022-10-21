@@ -9,12 +9,10 @@
     require_once 'functions.php';
     date_default_timezone_set('Europe/Moscow');
     define('COMMENT_MIN_LENGTH', 4);
-    $title = 'readme: пост ' . $postData['header'];
-    $authorRegisterDate = new DateTime($postData['register_date']);
     $userName = $_SESSION['user'];
 
     $postId = getQueryParam('post_id');
-
+  
     if (!empty($postId)) {
         $postData = getPostData($postId);
         increasePostView($postId, $postData['views_count']);
@@ -48,6 +46,9 @@
         $postAuthor = $postData['login'];
         header("Location: /profile.php?user=$postAuthor");
     }
+
+    $title = 'readme: пост ' . $postData['header'];
+    $authorRegisterDate = new DateTime($postData['register_date']);
 
     $content = include_template( 'detail-post.php', [
         'postData' => $postData, 
